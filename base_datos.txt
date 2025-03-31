@@ -1,0 +1,158 @@
+-- Tabla profesor
+CREATE TABLE profesor (
+    idprofesor INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_profesor VARCHAR(100) NOT NULL,
+    legajo VARCHAR(20) UNIQUE NOT NULL,
+    correo VARCHAR(100) UNIQUE NOT NULL,
+    observaciones TEXT NULL
+);
+
+-- Tabla materia
+CREATE TABLE materia (
+    idmateria INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_materia VARCHAR(100) NOT NULL,
+    cod_materia VARCHAR(20) NOT NULL UNIQUE
+);
+
+-- Tabla intermedia materias_profesores
+CREATE TABLE materias_profesores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idmateria INT NOT NULL,
+    idprofesor INT NOT NULL,
+    FOREIGN KEY (idmateria) REFERENCES materia(idmateria),
+    FOREIGN KEY (idprofesor) REFERENCES profesor(idprofesor),
+    UNIQUE KEY (idmateria, idprofesor)
+);
+
+-- Tabla usuarios
+CREATE TABLE usuarios (
+    idusuario INT AUTO_INCREMENT PRIMARY KEY,
+    usuario VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    idprofesor INT,
+    FOREIGN KEY (idprofesor) REFERENCES profesor(idprofesor) ON DELETE SET NULL
+);
+
+-- Tabla consultas_horario
+CREATE TABLE consultas_horario (
+    idconsultas_horario INT AUTO_INCREMENT PRIMARY KEY,
+    idmateria INT NOT NULL,
+    idprofesor INT NOT NULL,
+    dia VARCHAR(10) NOT NULL,
+    id_dia INT NOT NULL,
+    hora_ini TIME NOT NULL,
+    hora_fin TIME NOT NULL,
+    fecha_consulta DATE NULL,
+    estado ENUM('Activo','Inactivo','Pendiente','Aceptada','Rechazada') DEFAULT 'Pendiente',
+    Fecha_carga DATE,
+    FOREIGN KEY (idmateria) REFERENCES materia(idmateria),
+    FOREIGN KEY (idprofesor) REFERENCES profesor(idprofesor)
+);
+
+-- Tabla alumno
+CREATE TABLE alumno (
+    idalumno INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellido VARCHAR(50) NOT NULL,
+    legajo VARCHAR(20) NOT NULL,
+    correo VARCHAR(100) NOT NULL
+);
+
+-- Tabla consultas_horarios_bloqueos
+CREATE TABLE consultas_horarios_bloqueos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idconsultas_horario INT NOT NULL,
+    fecha_bloqueo DATE NOT NULL,
+    motivo TEXT NOT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (idconsultas_horario) REFERENCES consultas_horario(idconsultas_horario)
+);
+
+-- Tabla consultas
+CREATE TABLE consultas (
+    idconsultas INT AUTO_INCREMENT PRIMARY KEY,
+    idalumno INT NOT NULL,
+    idconsultas_horario INT NOT NULL,
+    fecha DATE NOT NULL,
+    estado ENUM('Pendiente','Confirmado','Rechazado') DEFAULT 'Pendiente',
+    FOREIGN KEY (idalumno) REFERENCES alumno(idalumno),
+    FOREIGN KEY (idconsultas_horario) REFERENCES consultas_horario(idconsultas_horario)
+);
+
+-- Tabla temporal para carga de Excel (usada en uploadexc.php)
+CREATE TEMPORARY TABLE IF NOT EXISTS TMP_consultas (
+    legajo INT,
+    cod_materia VARCHAR(45),
+    dia VARCHAR(45),
+    hora_inicio VARCHAR(45),
+    min_inicio VARCHAR(45),
+    min_fin VARCHAR(45),
+    hora_fin VARCHAR(45),
+    id_dia INT
+);
+
+-- Vista consultas_pendientes_aprobacion (ejemplo)
+CREATE VIEW consultas_pendientes_aprobacion AS
+SELECT 
+    c.idconsultas AS id,
+    m.nombre_materia,
+    c.fecha,
+    CONCAT(ch.hora_ini, ' - ', ch.hora_fin) AS hora_ini_fin,
+    CONCAT(a.nombre, ' ', a.apellido) AS nombre,
+    a.correo
+FROM 
+    consultas c
+    INNER JOIN alumno a ON c.idalumno = a.idalumno
+    INNER JOIN consultas_horario ch ON c.idconsultas_horario = ch.idconsultas_horario
+    INNER JOIN materia m ON ch.idmateria = m.idmateria
+WHERE 
+    c.estado = 'Pendiente';
+
+-- Vista consultas_pendientes_aprobacion_admin (ejemplo)
+CREATE VIEW consultas_pendientes_aprobacion_admin AS
+SELECT 
+    ch.idconsultas_horario AS id,
+    m.nombre_materia,
+    p.nombre_profesor,
+    p.legajo,
+    ch.fecha_consulta,
+    ch.dia,
+    CONCAT(ch.hora_ini, ' - ', ch.hora_fin) AS hora_ini_fin,
+    ch.estado
+FROM 
+    consultas_horario ch
+    INNER JOIN materia m ON ch.idmateria = m.idmateria
+    INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
+WHERE 
+    ch.estado = 'Pendiente';
+
+-- Procedimiento almacenado filtro_consultas
+DELIMITER //
+CREATE PROCEDURE filtro_consultas(IN p_idmateria INT, IN p_idprofesor INT)
+BEGIN
+    SELECT 
+        ch.idconsultas_horario,
+        m.nombre_materia,
+        p.nombre_profesor,
+        ch.fecha_consulta AS fecha,
+        ch.dia,
+        ch.hora_ini,
+        ch.hora_fin
+    FROM 
+        consultas_horario ch
+        INNER JOIN materia m ON ch.idmateria = m.idmateria
+        INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
+    WHERE 
+        (p_idmateria = -1 OR ch.idmateria = p_idmateria) AND
+        (p_idprofesor = -1 OR ch.idprofesor = p_idprofesor) AND
+        ch.estado = 'Activo';
+END //
+DELIMITER ;
+
+
+-- Datos
+INSERT INTO `profesor` (`idprofesor`, `nombre_profesor`, `legajo`, `correo`, `observaciones`) 
+VALUES (NULL, 'test prof', '42798', 'test@gmail.com', 'observacion 1');
+
+INSERT INTO usuarios (usuario, password, idprofesor) 
+VALUES ('admin', MD5('password123'), 1);
