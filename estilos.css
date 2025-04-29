@@ -1,3 +1,15 @@
+.fs-2-rem {
+  font-size: 2rem !important;
+}
+
+.bg-blue-light {
+  background-color: #E6F2FF !important;
+}
+
+.bg-blue-dark {
+	background-color: #003A6B !important;
+}
+
 .text-white {
 	color: #fff !important;
 }
@@ -29,12 +41,17 @@ a.text-white:focus {
 }
 
 .btn-login {
-	font-size: 0.9rem;
-	letter-spacing: 0.05rem;
-	padding: 0.75rem 1rem;
-	border-radius: 2rem;
-	background-color: #7eb6c4;
-	border-color: #7eb6c4;
+	background-color: #003A6B;
+  color: white;
+  border: 2px solid #FFFFFF;
+  border-radius: 2rem;
+  padding: 10px 20px;
+}
+
+.btn-login:hover {
+  background-color: #00508F;
+  border-color: #FFFFFF;
+  color: white;
 }
 
 .mb-0,
@@ -238,7 +255,7 @@ body {
 	margin: 0;
 	text-align: left;
 	color: #525f7f;
-	background-color: #f8f9fe;
+	background-color: #DFDFDF;
 }
 
 [tabindex='-1']:focus:not(:focus-visible) {
@@ -612,7 +629,7 @@ h6,
 }
 
 .bg-primary {
-	background-color: #5e72e4 !important;
+	background-color: #4662ff !important;
 }
 
 label {
@@ -754,6 +771,7 @@ label {
 }
 
 .navbar {
+	background-color: #003A6B;
 	position: relative;
 	display: flex;
 	padding: 1rem 1rem;
@@ -2199,7 +2217,7 @@ a.text-neutral:focus {
 	padding-right: 1rem;
 	padding-left: 1rem;
 	border-radius: .375rem;
-	background: #f6f9fc;
+	background: #B3D4FF;
 }
 
 .navbar-vertical.navbar-expand-xs .lavalamp-object {
@@ -3146,10 +3164,6 @@ h6>a {
 	font-weight: 600;
 	letter-spacing: .025em;
 	text-transform: uppercase;
-}
-
-.bg-white {
-	background-color: #fff !important;
 }
 
 a.bg-white:hover,

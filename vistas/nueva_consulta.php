@@ -22,7 +22,7 @@
     include("componentes/header.php") ?>
 
 
-    <div class="container-fluid mt--6">
+    <div class="container-fluid pt-4">
       <div class="row">
         <div class="col">
           <div class="card">

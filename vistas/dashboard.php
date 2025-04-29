@@ -11,23 +11,18 @@
 </head>
 
 <body>
-
   <?php include("componentes/sidebar.php") ?>
   <?php include("../bd/conexion.php");
   $objeto = new Conexion();
   $conexion = $objeto->Conectar(); ?>
 
-
   <div class="main-content" id="panel">
-
     <?php include("componentes/navbar.php")
     ?>
 
-    <div class="header bg-primary pb-6">
+    <div>
       <div class="container-fluid">
-
         <div class="row">
-
           <?php $cardnum = "1";
           include("componentes/dashboard_cards.php") ?>
 
@@ -42,13 +37,11 @@
           <?php
           $cardnum = "4";
           include("componentes/dashboard_cards.php") ?>
-
         </div>
-
       </div>
     </div>
 
-    <div class="container-fluid mt--6">
+    <div class="container-fluid">
       <div class="row">
         <div class="col-xl-12">
           <div class="card">
@@ -63,7 +56,6 @@
               </div>
             </div>
             <div class="table-responsive">
-
               <table class="table align-items-center table-flush">
                 <thead class="thead-light">
                   <tr>
@@ -125,7 +117,6 @@
               echo '<ul class="pagination justify-content-end mb-0">';
 
               for ($i = 1; $i <= $total_paginas; $i++) {
-
                 echo '<li class="page-item ';
                 echo ($pagina == $i) ?  'active' : '';
                 echo '">';
@@ -140,7 +131,6 @@
           </div>
         </div>
       </div>
-
     </div>
     <br>
 
@@ -156,7 +146,6 @@
               </div>
             </div>
             <div class="table-responsive">
-
               <table class="table align-items-center table-flush">
                 <thead class="thead-light">
                   <tr>
@@ -218,7 +207,6 @@
               echo '<ul class="pagination justify-content-end mb-0">';
 
               for ($i = 1; $i <= $total_paginas_canc; $i++) {
-
                 echo '<li class="page-item ';
                 echo ($pagina_canc == $i) ?  'active' : '';
                 echo '">';
@@ -233,13 +221,11 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
   <script src="../assets/vendor/jquery/dist/jquery.min.js"></script>
   <script src="../assets/vendor/js-cookie/js.cookie.js"></script>
   <script src="../assets/js/argon.js?v=1.2.0"></script>
-
 </body>
 
 </html>

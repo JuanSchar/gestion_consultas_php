@@ -9,7 +9,7 @@
 
 <body>
 
-  <nav class="sidenav navbar navbar-vertical  fixed-left  navbar-expand-xs navbar-light bg-white" id="sidenav-main">
+  <nav class="sidenav navbar navbar-vertical fixed-left navbar-expand-xs navbar-light bg-blue-light" id="sidenav-main">
     <div id="mySidenav" class="scrollbar-inner">
 
       <div class="sidenav-header  align-items-center">
