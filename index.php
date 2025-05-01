@@ -57,7 +57,7 @@
                   echo '<select onchange="filtrarPorMateria(' . !isset($_GET['id_profesor_filtro']) . ')" name="materia" id="materia"  class="form-control" >';
                   echo '<option value=-1>Seleccione...</option>';
                   foreach ($data as $fila) {
-                      echo ' <option value="' . $fila["idmateria"] . '">' . $fila["nombre_materia"] . '</option>';
+                    echo ' <option value="' . $fila["idmateria"] . '">' . $fila["nombre_materia"] . '</option>';
                   }
                   echo ' </select>';
                 } else {

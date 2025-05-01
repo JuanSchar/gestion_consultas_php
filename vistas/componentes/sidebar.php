@@ -8,7 +8,6 @@
 </head>
 
 <body>
-
   <nav class="sidenav navbar navbar-vertical fixed-left navbar-expand-xs navbar-light bg-blue-light" id="sidenav-main">
     <div id="mySidenav" class="scrollbar-inner">
 
@@ -18,9 +17,7 @@
         </a>
       </div>
       <div class="navbar-inner">
-
         <div class="collapse navbar-collapse" id="sidenav-collapse-main">
-
           <ul class="navbar-nav">
             <?php
             session_start();
@@ -39,7 +36,6 @@
 
 
             if (isset($_SESSION["s_profesor"])) {
-
               echo '<li class="nav-item ">';
               echo '<a class="nav-link ';
               if (strpos($page, 'listado_consultas')) {
@@ -96,7 +92,6 @@
               echo '</li>';
             }
             if (isset($_SESSION["s_profesor"])) {
-
               echo '<li class="nav-item">';
               echo '<a class="nav-link ';
               if (strpos($page, 'mi_cuenta')) {
@@ -127,18 +122,11 @@
                 <span class="nav-link-text">Cerrar sesión</span>
               </a>
             </li>
-
-
-
           </ul>
         </div>
       </div>
     </div>
   </nav>
-
-
 </body>
-
-
 
 </html>

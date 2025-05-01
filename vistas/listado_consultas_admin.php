@@ -11,21 +11,17 @@
 
 </head>
 <body>
-
   <?php include("componentes/sidebar.php") ?>
   <?php include("../bd/conexion.php") ?>
 
   <div class="main-content" id="panel">
-
     <?php include("componentes/navbar.php") ?>
     <?php $title = "Listado de consultas"; include("componentes/header.php") ?>
-
 
     <div class="container-fluid pt-4">
       <div class="row">
         <div class="col">
           <div class="card">
-    
             <div class="card-header border-0">
               <h3 class="mb-0">Listado de consultas pendientes de aprobación</h3>
             </div>
@@ -50,11 +46,10 @@
                   $resultado->execute();
                   $pagina = isset ( $_GET['pagina']) ? $_GET['pagina'] : null ;
                   if (!$pagina) {
-                  $inicio = 0;
-                  $pagina=1;
-                  }
-                  else {
-                  $inicio = ($pagina - 1) * $Cant_por_Pag;
+                    $inicio = 0;
+                    $pagina=1;
+                  } else {
+                    $inicio = ($pagina - 1) * $Cant_por_Pag;
                   }
                   $total_registros= $resultado->rowCount();
                   $total_paginas = ceil($total_registros/ $Cant_por_Pag);
@@ -65,14 +60,14 @@
                   if ($resultado->rowCount() > 0) {
                     echo '<form id="accionBotonAdmin" class="form" action="" method="POST">';
                     foreach($data as $fila) {
-                        $date = '';
-                        $new_date = '';
-                        if ( $fila["fecha_consulta"] ) {
-                            $date = strtotime($fila["fecha_consulta"]);
-                            $new_date = date('d-m-Y', $date);
-                        } else {
-                            $new_date = 'Todos los ' . $fila["dia"];
-                        }
+                      $date = '';
+                      $new_date = '';
+                      if ( $fila["fecha_consulta"] ) {
+                        $date = strtotime($fila["fecha_consulta"]);
+                        $new_date = date('d-m-Y', $date);
+                      } else {
+                        $new_date = 'Todos los ' . $fila["dia"];
+                      }
 
                       echo '<tr>';
                         echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
@@ -81,8 +76,8 @@
                         echo '<td>' . $fila["hora_ini_fin"] . '</td>';
                         echo '
                         <td>
-                            <input type="submit" id="aceptar' . $fila["id"] . '1" name="aceptar' . $fila["id"] . '1" data-accion=1 data-fila=' . $fila["id"] . ' class="btn btn-success btn-sm" value="ACEPTAR" />
-                            <input type="submit" id="rechazar' . $fila["id"] . '2" name="rechazar' . $fila["id"] . '2" data-accion=2 data-fila=' . $fila["id"] . ' class="btn btn-danger btn-sm" value="RECHAZAR" />
+                          <input type="submit" id="aceptar' . $fila["id"] . '1" name="aceptar' . $fila["id"] . '1" data-accion=1 data-fila=' . $fila["id"] . ' class="btn btn-success btn-sm" value="ACEPTAR" />
+                          <input type="submit" id="rechazar' . $fila["id"] . '2" name="rechazar' . $fila["id"] . '2" data-accion=2 data-fila=' . $fila["id"] . ' class="btn btn-danger btn-sm" value="RECHAZAR" />
                         </td>';
                       echo '</tr>';
                     }
@@ -95,33 +90,29 @@
               </table>
             </div>
             <?php
-if ($total_paginas > 1){
-  echo '<div class="card-footer py-4">';
-  echo '  <nav aria-label="...">';
-  echo '    <ul class="pagination justify-content-end mb-0">';
+              if ($total_paginas > 1){
+                echo '<div class="card-footer py-4">';
+                echo '  <nav aria-label="...">';
+                echo '    <ul class="pagination justify-content-end mb-0">';
 
-for ($i=1;$i<=$total_paginas;$i++){
-  
-  echo '<li class="page-item ';
-  echo ($pagina == $i) ?  'active': '';
-  echo '">';
-  echo '<a class="page-link" href="listado_consultas_admin.php?pagina=' . $i . '">' . $i . '</a>';
-  echo'</li>';
-}
-echo '    </ul>';
-echo '  </nav>';
-echo '</div>';
-}
-?>
+                for ($i=1;$i<=$total_paginas;$i++) {
+                  echo '<li class="page-item ';
+                  echo ($pagina == $i) ?  'active': '';
+                  echo '">';
+                  echo '<a class="page-link" href="listado_consultas_admin.php?pagina=' . $i . '">' . $i . '</a>';
+                  echo'</li>';
+                }
+                echo '    </ul>';
+                echo '  </nav>';
+                echo '</div>';
+              }
+            ?>
           </div>
         </div>
       </div>
     </div>
-    
   </div>
 
-
-  
   <script src="../assets/vendor/jquery/dist/jquery.min.js"></script>
   <script src="../assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../assets/vendor/js-cookie/js.cookie.js"></script>
@@ -129,11 +120,6 @@ echo '</div>';
   <script src="../assets/vendor/jquery-scroll-lock/dist/jquery-scrollLock.min.js"></script>
   <script src="../assets/js/argon.js?v=1.2.0"></script>
   <script src="../codigo.js"></script>
-
-
 </body>
-
-
-
 
 </html>

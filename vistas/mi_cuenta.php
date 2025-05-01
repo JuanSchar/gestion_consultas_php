@@ -11,34 +11,26 @@
 </head>
 
 <body>
-
- <?php
-
- include("componentes/sidebar.php") ?>
+  <?php
+    include("componentes/sidebar.php") ?>
 
   <div class="main-content" id="panel">
+    <?php include("componentes/navbar.php") ?>
+    <?php include("../bd/conexion.php");
+    $objeto = new Conexion();
+    $conexion = $objeto->Conectar(); ?>
+    <br>
+    <br>
+    <br>
+    <br>
 
-     <?php include("componentes/navbar.php") ?>
-     <?php include("../bd/conexion.php");
-  $objeto = new Conexion();
-  $conexion = $objeto->Conectar(); ?>
-
-<br>
-<br>
-<br>
-<br>
-
-<?php 
-
-$resultado = $conexion->prepare('SELECT * FROM profesor WHERE idprofesor = ?;');
-$resultado->execute([$_SESSION["s_profesor"]]);
-$data = $resultado->fetch(PDO::FETCH_ASSOC);
-
-?>
-  
+    <?php 
+      $resultado = $conexion->prepare('SELECT * FROM profesor WHERE idprofesor = ?;');
+      $resultado->execute([$_SESSION["s_profesor"]]);
+      $data = $resultado->fetch(PDO::FETCH_ASSOC);
+    ?>
     <div class="container-fluid mt--6">
       <div class="row">
-        
         <div class="col-xl-12 order-xl-1">
           <div class="card">
             <div class="card-header">
@@ -75,8 +67,7 @@ $data = $resultado->fetch(PDO::FETCH_ASSOC);
                     </div>
                   </div>
                 </div>
-       
-                
+
                 <div class="pl-lg-4">
                   <div class="form-group">
                     <label class="form-control-label">Observaciones</label>
@@ -89,28 +80,25 @@ $data = $resultado->fetch(PDO::FETCH_ASSOC);
                   </div>
                 </div>
                 <?php 
-                    if(isset($_POST['guardar']) ) {
-                      $nombre_profesor = $_POST['apellido'] . ", " . $_POST['nombre'];
-                      $resultado = $conexion->prepare("
-                      START TRANSACTION;
-                          UPDATE profesor p 
-                          SET p.nombre_profesor = ?, p.observaciones = ?, p.correo = ? 
-                          WHERE p.idprofesor = ?;
-                      COMMIT;");
-                      $retorno = $resultado->execute([$nombre_profesor, $_POST['observaciones'], $_POST['correo'], $_SESSION['s_profesor']]);
-                      if ($retorno) {
-                        
-                        echo '<div class="correcto">Datos guardados correctamente.</div>';
-
-                      }
+                  if(isset($_POST['guardar']) ) {
+                    $nombre_profesor = $_POST['apellido'] . ", " . $_POST['nombre'];
+                    $resultado = $conexion->prepare("
+                    START TRANSACTION;
+                      UPDATE profesor p 
+                      SET p.nombre_profesor = ?, p.observaciones = ?, p.correo = ? 
+                      WHERE p.idprofesor = ?;
+                    COMMIT;");
+                    $retorno = $resultado->execute([$nombre_profesor, $_POST['observaciones'], $_POST['correo'], $_SESSION['s_profesor']]);
+                    if ($retorno) {
+                      echo '<div class="correcto">Datos guardados correctamente.</div>';
                     }
+                  }
                 ?>
               </form>
             </div>
           </div>
         </div>
       </div>
-   
     </div>
   </div>
 

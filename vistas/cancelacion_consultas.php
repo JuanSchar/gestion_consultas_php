@@ -11,22 +11,18 @@
 </head>
 
 <body>
-
   <?php include("componentes/sidebar.php") ?>
   <?php include("../bd/conexion.php") ?>
 
   <div class="main-content" id="panel">
     <?php include("componentes/navbar.php") ?>
-
     <?php $title = "Cancelación de consultas";
     include("componentes/header.php") ?>
-
 
     <div class="container-fluid pt-4">
       <div class="row">
         <div class="col">
           <div class="card">
-
             <div class="card-header border-0">
               <h3 class="mb-0">Cancelación de consultas</h3>
             </div>
@@ -116,11 +112,7 @@
         </div>
       </div>
     </div>
-
-
   </div>
-  </div>
-
 
   <script src="../assets/vendor/jquery/dist/jquery.min.js"></script>
   <script src="../assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -132,9 +124,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
 
   <script>
-
     $('#calendario').on('change', function() {
-
       if (parseInt(this.value) === 1) {
         document.getElementById("fechaLabel").innerHTML = 'Seleccionar dia'
         document.getElementById("fecha").setAttribute('type', 'date')
@@ -146,7 +136,6 @@
         document.getElementById("fecha").setAttribute('min', '2020-W' + moment().format('W'));
         document.getElementById("fecha").setAttribute('value', '2020-W' + moment().format('W'));
       }
-
     }).trigger('change');
 
     $('#fecha').on('change', function() {
@@ -158,11 +147,8 @@
       } else {
         document.getElementById("fecha_desde").setAttribute('value', moment(this.value).format('YYYY-MM-DD'));
         document.getElementById("fecha_hasta").setAttribute('value', moment(this.value).format('YYYY-MM-DD'));
-
       }
-
     }).trigger('change');
-
   </script>
 </body>
 

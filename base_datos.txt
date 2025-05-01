@@ -188,13 +188,14 @@ CREATE PROCEDURE consultas_canceladas(
     IN p_limit INT
 )
 BEGIN
+    -- Consultas rechazadas
     SELECT 
         m.nombre_materia,
         p.nombre_profesor,
-        c.fecha AS fecha_cancelacion,
+        c.fecha AS fecha_bloqueo,
         ch.hora_ini,
         ch.hora_fin,
-        'Rechazado' AS motivo  -- O puedes usar un campo específico si existe
+        'Rechazado' AS motivo
     FROM 
         consultas c
         INNER JOIN consultas_horario ch ON c.idconsultas_horario = ch.idconsultas_horario
@@ -204,8 +205,28 @@ BEGIN
         ch.idprofesor = p_idprofesor
         AND c.estado = 'Rechazado'
         AND c.fecha >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+    
+    UNION ALL
+    
+    -- Bloqueos programados
+    SELECT 
+        m.nombre_materia,
+        p.nombre_profesor,
+        chb.fecha_bloqueo AS fecha_bloqueo,
+        ch.hora_ini,
+        ch.hora_fin,
+        chb.motivo AS motivo
+    FROM 
+        consultas_horarios_bloqueos chb
+        INNER JOIN consultas_horario ch ON chb.idconsultas_horario = ch.idconsultas_horario
+        INNER JOIN materia m ON ch.idmateria = m.idmateria
+        INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
+    WHERE 
+        ch.idprofesor = p_idprofesor
+        AND chb.fecha_bloqueo >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+    
     ORDER BY 
-        c.fecha DESC
+        fecha_bloqueo DESC
     LIMIT p_offset, p_limit;
 END //
 DELIMITER ;

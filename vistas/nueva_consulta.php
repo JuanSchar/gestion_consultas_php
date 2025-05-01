@@ -11,22 +11,18 @@
 </head>
 
 <body>
-
   <?php include("componentes/sidebar.php") ?>
   <?php include("../bd/conexion.php") ?>
 
   <div class="main-content" id="panel">
     <?php include("componentes/navbar.php") ?>
-
     <?php $title = "Nueva consulta";
     include("componentes/header.php") ?>
-
 
     <div class="container-fluid pt-4">
       <div class="row">
         <div class="col">
           <div class="card">
-
             <div class="card-header border-0">
               <h3 class="mb-0">Nueva consulta</h3>
             </div>
@@ -57,13 +53,11 @@
                         } else {
                           echo 'No tiene materias asignadas.';
                         }
-
                         ?>
                         </select>
                       </div>
                     </div>
                     <div class="col-lg-3">
-
                       <div class="form-group">
                         <label class="form-control-label" for="dia">Día</label>
                         <select name="dia" id="dia" class="form-control">
@@ -88,7 +82,6 @@
                       <div class="form-group">
                         <label class="form-control-label" for="hora_hasta">Hora hasta:</label>
                         <input id="hora_hasta" type="time" name="hora_hasta" value="00:00" class="form-control">
-
                       </div>
                     </div>
                     <div class="col-lg-3">
@@ -107,7 +100,6 @@
                     </div>
                   </div>
                 </div>
-                
               </form>
               <div id="error"></div>
               <?php
@@ -125,11 +117,9 @@
     <br>
 
     <div class="container-fluid mt--6">
-
       <div class="row">
         <div class="col">
           <div class="card">
-
             <div class="card-header border-0">
               <h3 class="mb-0">Consultas existentes</h3>
             </div>
@@ -152,16 +142,15 @@
                           <tbody class="list">
                             <?php
                             $resultado = $conexion->prepare('
-                                select distinct idprofesor, dia, fecha_consulta, CONCAT(hora_ini, " - ", hora_fin) "hora_ini_fin", materia.idmateria, materia.nombre_materia, estado 
-                                from consultas_horario 
-                                inner join materia on materia.idmateria = consultas_horario.idmateria 
-                                where idprofesor = ?;');
+                              select distinct idprofesor, dia, fecha_consulta, CONCAT(hora_ini, " - ", hora_fin) "hora_ini_fin", materia.idmateria, materia.nombre_materia, estado 
+                              from consultas_horario 
+                              inner join materia on materia.idmateria = consultas_horario.idmateria 
+                              where idprofesor = ?;');
                             $resultado->execute([$_SESSION["s_profesor"]]);
                             $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
                             if ($resultado->rowCount() > 0) {
                               foreach ($data as $fila) {
-
                                 $date = '';
                                 $new_date = '';
                                 if ($fila["fecha_consulta"]) {
@@ -174,32 +163,24 @@
                                 echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
                                 echo '<td>' . $new_date . '</td>';
                                 echo '<td>' . $fila["hora_ini_fin"] . '</td>';
-                                echo '
-                                    <td>' . $fila["estado"] . '</td>';
+                                echo '<td>' . $fila["estado"] . '</td>';
                                 echo '</tr>';
                               }
                             }
-
                             ?>
                           </tbody>
                         </table>
                       </div>
                     </div>
-
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-
   </div>
-
-
 
   <script src="../assets/vendor/jquery/dist/jquery.min.js"></script>
   <script src="../assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -212,36 +193,32 @@
   <script>
     form = document.getElementById("nueva_consulta");
     form.addEventListener('submit', function (event) {
-  // si el campo de correo electrónico es válido, dejamos que el formulario se envíe
+      // si el campo de correo electrónico es válido, dejamos que el formulario se envíe
+      if ( document.getElementById("dia").value  == -1) {
+        document.getElementById("error").innerHTML = '<b>Debe seleccionar un dia</b>';
+        event.preventDefault();
+      }
 
-  if ( document.getElementById("dia").value  == -1) {
-    document.getElementById("error").innerHTML = '<b>Debe seleccionar un dia</b>';
-    event.preventDefault();
-  }  
+      if ( document.getElementById("fecha").value  == '' && !document.getElementById("se_repite").checked ) {
+        document.getElementById("error").innerHTML = '<b>Debe seleccionar una fecha</b>';
+        event.preventDefault();
+      }
 
-  if ( document.getElementById("fecha").value  == '' && !document.getElementById("se_repite").checked ) {
-    document.getElementById("error").innerHTML = '<b>Debe seleccionar una fecha</b>';
-    event.preventDefault();
-  }  
+      if ( document.getElementById("hora_hasta").value < document.getElementById("hora_desde").value) { 
+        document.getElementById("error").innerHTML = '<b>La hora hasta no puede ser menor a la hora desde</b>d';
+        event.preventDefault();
+      }
+    });
+    fecha.min = new Date().toISOString().split("T")[0]
 
-  if ( document.getElementById("hora_hasta").value < document.getElementById("hora_desde").value) { 
-    document.getElementById("error").innerHTML = '<b>La hora hasta no puede ser menor a la hora desde</b>d';
-    event.preventDefault();
-  }
-
-});
-fecha.min = new Date().toISOString().split("T")[0]
-
-$('#se_repite').on('change', function() {
-
-  if ( this.checked ) {
-    document.getElementById("selecciona_fecha").style.display = 'none'
-  } else {
-    document.getElementById("selecciona_fecha").style.display = 'block'
-  }
-
-});
-</script>
+    $('#se_repite').on('change', function() {
+      if ( this.checked ) {
+        document.getElementById("selecciona_fecha").style.display = 'none'
+      } else {
+        document.getElementById("selecciona_fecha").style.display = 'block'
+      }
+    });
+  </script>
 </body>
 
 </html>
