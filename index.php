@@ -111,7 +111,7 @@
             <div class="table-responsive">
               <?php
               if (isset($_GET['retorno']) && $_GET['retorno'] == 1) {
-                echo '<div class="correcto">Consulta registrada correctamente.</div>';
+                echo '<div class="p-2 alert-success rounded">Consulta registrada correctamente.</div>';
               }
 
               if (isset($_GET['buscar'])) {

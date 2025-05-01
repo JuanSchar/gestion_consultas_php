@@ -55,7 +55,7 @@
                 </div>
               </div>
             </div>
-            <div class="table-responsive">
+            <div class="table-responsive pb-4">
               <table class="table align-items-center table-flush">
                 <thead class="thead-light">
                   <tr>
@@ -91,16 +91,16 @@
                   if ($resultado->rowCount() > 0) {
                     foreach ($data as $fila) {
                       echo '<tr>';
-                      echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
-                      if (!isset($_SESSION["s_profesor"])) {
-                        echo '<td>' . $fila["nombre_profesor"] . '</td>';
-                      }
+                        echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
+                        if (!isset($_SESSION["s_profesor"])) {
+                          echo '<td>' . $fila["nombre_profesor"] . '</td>';
+                        }
 
-                      $date = strtotime($fila["fecha_gen"]);
-                      $new_date = date('d-m-Y', $date);
-                      echo '<td>' .   $new_date . '</td>';
-                      echo '<td>' . $fila["hora_ini"] . '</td>';
-                      echo '<td>' . $fila["cantidad_alumnos"] . '</td>';
+                        $date = strtotime($fila["fecha_gen"]);
+                        $new_date = date('d-m-Y', $date);
+                        echo '<td>' .   $new_date . '</td>';
+                        echo '<td>' . $fila["hora_ini"] . ' - ' . $fila["hora_fin"] . '</td>';
+                        echo '<td>' . $fila["cantidad_alumnos"] . '</td>';
                       echo '</tr>';
                     }
                   } else {
@@ -189,7 +189,7 @@
                       $date = strtotime($fila["fecha_bloqueo"]);
                       $new_date = date('d-m-Y', $date);
                       echo '<td>' .   $new_date . '</td>';
-                      echo '<td>' . $fila["hora_ini"] . '</td>';
+                      echo '<td>' . $fila["hora_ini"] . ' - ' . $fila["hora_fin"] . '</td>';
                       echo '<td>' . $fila["motivo"] . '</td>';
                       echo '</tr>';
                     }

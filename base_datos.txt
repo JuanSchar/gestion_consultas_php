@@ -145,10 +145,102 @@ BEGIN
     WHERE 
         (p_idmateria = -1 OR ch.idmateria = p_idmateria) AND
         (p_idprofesor = -1 OR ch.idprofesor = p_idprofesor) AND
-        ch.estado = 'Activo';
+        ch.estado = 'Aceptada';
 END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE proximas_consultas(
+    IN p_idprofesor INT,
+    IN p_offset INT,
+    IN p_limit INT
+)
+BEGIN
+    SELECT 
+        m.nombre_materia,
+        p.nombre_profesor,
+        ch.fecha_consulta AS fecha_gen,
+        ch.hora_ini,
+        ch.hora_fin,
+        COUNT(c.idconsultas) AS cantidad_alumnos
+    FROM 
+        consultas_horario ch
+        INNER JOIN materia m ON ch.idmateria = m.idmateria
+        INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
+        LEFT JOIN consultas c ON ch.idconsultas_horario = c.idconsultas_horario 
+            AND c.estado IN ('Confirmado', 'Aceptado')  -- Ampliar estados válidos
+    WHERE 
+        ch.idprofesor = p_idprofesor
+        AND ch.estado IN ('Activo', 'Aceptada')  -- Ampliar estados válidos
+        AND ch.fecha_consulta >= CURDATE()  -- Solo futuras
+    GROUP BY 
+        ch.idconsultas_horario
+    ORDER BY 
+        ch.fecha_consulta ASC, ch.hora_ini ASC
+    LIMIT p_offset, p_limit;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE consultas_canceladas(
+    IN p_idprofesor INT,
+    IN p_offset INT,
+    IN p_limit INT
+)
+BEGIN
+    SELECT 
+        m.nombre_materia,
+        p.nombre_profesor,
+        c.fecha AS fecha_cancelacion,
+        ch.hora_ini,
+        ch.hora_fin,
+        'Rechazado' AS motivo  -- O puedes usar un campo específico si existe
+    FROM 
+        consultas c
+        INNER JOIN consultas_horario ch ON c.idconsultas_horario = ch.idconsultas_horario
+        INNER JOIN materia m ON ch.idmateria = m.idmateria
+        INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
+    WHERE 
+        ch.idprofesor = p_idprofesor
+        AND c.estado = 'Rechazado'
+        AND c.fecha >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+    ORDER BY 
+        c.fecha DESC
+    LIMIT p_offset, p_limit;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE consultas_a_cancelar(
+    IN p_idprofesor INT,
+    IN p_fecha_desde DATE,
+    IN p_fecha_hasta DATE
+)
+BEGIN
+    SELECT 
+        ch.idconsultas_horario,
+        m.nombre_materia,
+        ch.fecha_consulta AS fecha,
+        ch.hora_ini,
+        ch.dia
+    FROM 
+        consultas_horario ch
+        INNER JOIN materia m ON ch.idmateria = m.idmateria
+    WHERE 
+        ch.idprofesor = p_idprofesor
+        AND ch.estado = 'Activo'
+        AND (
+            (ch.fecha_consulta BETWEEN p_fecha_desde AND p_fecha_hasta)
+            OR
+            (ch.fecha_consulta IS NULL AND ch.dia = DAYNAME(p_fecha_desde))
+        )
+        AND NOT EXISTS (
+            SELECT 1 FROM consultas_horarios_bloqueos chb
+            WHERE chb.idconsultas_horario = ch.idconsultas_horario
+            AND chb.fecha_bloqueo = p_fecha_desde
+        );
+END //
+DELIMITER ;
 
 -- Datos
 INSERT INTO `profesor` (`idprofesor`, `nombre_profesor`, `legajo`, `correo`, `observaciones`) 
@@ -156,3 +248,6 @@ VALUES (NULL, 'test prof', '42798', 'test@gmail.com', 'observacion 1');
 
 INSERT INTO usuarios (usuario, password, idprofesor) 
 VALUES ('admin', MD5('password123'), 1);
+
+INSERT INTO `materia` (`idmateria`, `nombre_materia`, `cod_materia`) VALUES (NULL, 'Simulación', 'S354');
+INSERT INTO `materia` (`idmateria`, `nombre_materia`, `cod_materia`) VALUES (NULL, 'Inteligencia Artificial', 'S489');
