@@ -1,12 +1,3 @@
-<?php
-  if(!isset($_SESSION)) { 
-    session_start(); 
-  } 
-  if( !isset($_SESSION["s_usuario"])){
-    header("Location: ../index.php");
-  }
-?>
-
 <!DOCTYPE html> 
 <head>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">

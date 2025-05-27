@@ -20,7 +20,6 @@
         <div class="collapse navbar-collapse" id="sidenav-collapse-main">
           <ul class="navbar-nav">
             <?php
-            session_start();
             $page = $_SERVER['REQUEST_URI'];
 
             echo '<li class="nav-item">';
