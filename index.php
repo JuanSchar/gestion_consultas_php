@@ -135,8 +135,12 @@
                 if ($resultado->rowCount() > 0) {
                   echo ' <form class="form" action="" method="POST">';
                   foreach ($data as $fila) {
-                    $date = strtotime($fila["fecha"]);
-                    $new_date = date('d-m-Y', $date);
+                    if ($fila["fecha"] == null) {
+                      $new_date = "Sin fecha";
+                    } else {
+                      $date = strtotime($fila["fecha"]);
+                      $new_date = date('d-m-Y', $date);
+                    }
                     echo '<tr>';
                     echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
                     echo '<td>' .   $new_date . '</td>';

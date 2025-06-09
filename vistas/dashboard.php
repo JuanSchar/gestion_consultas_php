@@ -19,8 +19,7 @@
   $conexion = $objeto->Conectar(); ?>
 
   <div class="main-content" id="panel">
-    <?php include("componentes/navbar.php")
-    ?>
+    <?php include("componentes/navbar.php") ?>
 
     <div>
       <div class="container-fluid">

@@ -90,19 +90,6 @@
               echo '</a>';
               echo '</li>';
             }
-            if (isset($_SESSION["s_profesor"])) {
-              echo '<li class="nav-item">';
-              echo '<a class="nav-link ';
-              if (strpos($page, 'mi_cuenta')) {
-                echo 'active';
-              }
-
-              echo '" href="../vistas/mi_cuenta.php">';
-              echo '<span class="nav-link-text">Mi perfil</span>';
-              echo '</a>';
-              echo '</li>';
-            }
-
             ?>
             <?php
             echo '<li class="nav-item">';
@@ -115,12 +102,6 @@
               </a>
             </li>';
             ?>
-
-            <li class="nav-item">
-              <a class="nav-link" href="../bd/logout.php">
-                <span class="nav-link-text">Cerrar sesión</span>
-              </a>
-            </li>
           </ul>
         </div>
       </div>

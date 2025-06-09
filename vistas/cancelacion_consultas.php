@@ -9,11 +9,14 @@
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="../plugins/sweetalert2/sweetalert2.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
+  <link rel="stylesheet" href="..\estilos.css" type="text/css">
 </head>
 
 <body>
   <?php include("componentes/sidebar.php") ?>
-  <?php include("../bd/conexion.php") ?>
+  <?php include("../bd/conexion.php");
+  $objeto = new Conexion();
+  $conexion = $objeto->Conectar(); ?>
 
   <div class="main-content" id="panel">
     <?php include("componentes/navbar.php") ?>
@@ -70,8 +73,6 @@
                 $fecha_desde = $_GET['fecha_desde'];
                 $fecha_hasta = $_GET['fecha_hasta'];
 
-                $objeto = new Conexion();
-                $conexion = $objeto->Conectar();
                 $resultado = $conexion->prepare('CALL consultas_a_cancelar(?, ?, ?)');
                 $resultado->execute([$idprofesor, $fecha_desde, $fecha_hasta]);
                 $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
@@ -116,11 +117,7 @@
   </div>
 
   <script src="../assets/vendor/jquery/dist/jquery.min.js"></script>
-  <script src="../assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../assets/vendor/js-cookie/js.cookie.js"></script>
-  <script src="../assets/vendor/jquery.scrollbar/jquery.scrollbar.min.js"></script>
-  <script src="../assets/vendor/jquery-scroll-lock/dist/jquery-scrollLock.min.js"></script>
-  <script src="../plugins/sweetalert2/sweetalert2.all.min.js"></script>
   <script src="../assets/js/argon.js?v=1.2.0"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
 

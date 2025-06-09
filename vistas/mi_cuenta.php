@@ -1,4 +1,5 @@
 <?php include("../auth.php"); ?>
+
 <!DOCTYPE html>
 <html>
 
@@ -6,31 +7,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Gestor de consultas UTN</title>
+  <link rel="stylesheet" href="..\estilos.css" type="text/css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
   <link rel="stylesheet" href="\bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="\gestion_consultas_php\estilos.css" type="text/css">
 </head>
 
 <body>
-  <?php
-    include("componentes/sidebar.php") ?>
+  <?php include("componentes/sidebar.php") ?>
+  <?php include("../bd/conexion.php");
+  $objeto = new Conexion();
+  $conexion = $objeto->Conectar(); ?>
 
   <div class="main-content" id="panel">
     <?php include("componentes/navbar.php") ?>
-    <?php include("../bd/conexion.php");
-    $objeto = new Conexion();
-    $conexion = $objeto->Conectar(); ?>
-    <br>
-    <br>
-    <br>
-    <br>
 
     <?php 
       $resultado = $conexion->prepare('SELECT * FROM profesor WHERE idprofesor = ?;');
       $resultado->execute([$_SESSION["s_profesor"]]);
       $data = $resultado->fetch(PDO::FETCH_ASSOC);
     ?>
-    <div class="container-fluid mt--6">
+    <div class="container-fluid pt-4">
       <div class="row">
         <div class="col-xl-12 order-xl-1">
           <div class="card">
@@ -108,10 +104,7 @@
   </div>
 
   <script src="../assets/vendor/jquery/dist/jquery.min.js"></script>
-  <script src="../assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../assets/vendor/js-cookie/js.cookie.js"></script>
-  <script src="../assets/vendor/jquery.scrollbar/jquery.scrollbar.min.js"></script>
-  <script src="../assets/vendor/jquery-scroll-lock/dist/jquery-scrollLock.min.js"></script>
   <script src="../assets/js/argon.js?v=1.2.0"></script>
 </body>
 

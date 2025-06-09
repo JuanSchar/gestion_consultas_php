@@ -1,3 +1,7 @@
+.w-200-px {
+  width: 200px !important;
+}
+
 .fs-2-rem {
   font-size: 2rem !important;
 }
@@ -605,7 +609,7 @@ h6,
 	position: relative;
 	display: block;
 	height: 2px;
-	background-color: #172b4d;
+	background-color: white !important;
 }
 
 .pb-6 {
@@ -663,6 +667,9 @@ label {
 	color: #212529;
 	border: 0;
 	background-color: transparent;
+  position: relative;
+  z-index: 10000 !important;
+  cursor: pointer;
 }
 
 .dropdown-item:hover,
@@ -680,7 +687,9 @@ label {
 }
 
 .dropdown-menu.show {
-	display: block;
+	display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .dropdown-header {
@@ -778,6 +787,7 @@ label {
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
+  z-index: 9998;
 }
 
 .navbar .container,
@@ -1644,7 +1654,21 @@ a.text-neutral:focus {
 }
 
 .dropdown-menu {
-	min-width: 12rem;
+	min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
+  font-size: 0.875rem;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.25rem;
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  left: auto !important;
+  transform: none !important;
+  z-index: 9999 !important;
 }
 
 .dropdown-menu .dropdown-item {
@@ -2025,6 +2049,7 @@ a.text-neutral:focus {
 }
 
 .navbar-vertical {
+  z-index: 10000 !important;
 	padding-top: 0;
 	border-width: 0 0 1px 0;
 	border-style: solid;
