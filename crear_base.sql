@@ -1,3 +1,8 @@
+-- Crear la base de datos
+DROP DATABASE IF EXISTS gestion_consultas;
+CREATE DATABASE gestion_consultas DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE gestion_consultas;
+
 -- Tabla profesor
 CREATE TABLE profesor (
     idprofesor INT AUTO_INCREMENT PRIMARY KEY,
@@ -91,7 +96,7 @@ CREATE TEMPORARY TABLE IF NOT EXISTS TMP_consultas (
     id_dia INT
 );
 
--- Vista consultas_pendientes_aprobacion (ejemplo)
+-- Vista consultas_pendientes_aprobacion
 CREATE VIEW consultas_pendientes_aprobacion AS
 SELECT 
     c.idconsultas AS id,
@@ -108,7 +113,7 @@ FROM
 WHERE 
     c.estado = 'Pendiente';
 
--- Vista consultas_pendientes_aprobacion_admin (ejemplo)
+-- Vista consultas_pendientes_aprobacion_admin
 CREATE VIEW consultas_pendientes_aprobacion_admin AS
 SELECT 
     ch.idconsultas_horario AS id,
@@ -126,7 +131,7 @@ FROM
 WHERE 
     ch.estado = 'Pendiente';
 
--- Procedimiento almacenado filtro_consultas
+-- Procedimientos almacenados
 DELIMITER //
 CREATE PROCEDURE filtro_consultas(IN p_idmateria INT, IN p_idprofesor INT)
 BEGIN
@@ -147,9 +152,6 @@ BEGIN
         (p_idprofesor = -1 OR ch.idprofesor = p_idprofesor) AND
         ch.estado = 'Aceptada';
 END //
-DELIMITER ;
-
-DELIMITER //
 CREATE PROCEDURE proximas_consultas(
     IN p_idprofesor INT,
     IN p_offset INT,
@@ -168,27 +170,23 @@ BEGIN
         INNER JOIN materia m ON ch.idmateria = m.idmateria
         INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
         LEFT JOIN consultas c ON ch.idconsultas_horario = c.idconsultas_horario 
-            AND c.estado IN ('Confirmado', 'Aceptado')  -- Ampliar estados válidos
+            AND c.estado IN ('Confirmado', 'Aceptado')
     WHERE 
         ch.idprofesor = p_idprofesor
-        AND ch.estado IN ('Activo', 'Aceptada')  -- Ampliar estados válidos
-        AND ch.fecha_consulta >= CURDATE()  -- Solo futuras
+        AND ch.estado IN ('Activo', 'Aceptada')
+        AND ch.fecha_consulta >= CURDATE()
     GROUP BY 
         ch.idconsultas_horario
     ORDER BY 
         ch.fecha_consulta ASC, ch.hora_ini ASC
     LIMIT p_offset, p_limit;
 END //
-DELIMITER ;
-
-DELIMITER //
 CREATE PROCEDURE consultas_canceladas(
     IN p_idprofesor INT,
     IN p_offset INT,
     IN p_limit INT
 )
 BEGIN
-    -- Consultas rechazadas
     SELECT 
         m.nombre_materia,
         p.nombre_profesor,
@@ -208,7 +206,6 @@ BEGIN
     
     UNION ALL
     
-    -- Bloqueos programados
     SELECT 
         m.nombre_materia,
         p.nombre_profesor,
@@ -229,9 +226,6 @@ BEGIN
         fecha_bloqueo DESC
     LIMIT p_offset, p_limit;
 END //
-DELIMITER ;
-
-DELIMITER //
 CREATE PROCEDURE consultas_a_cancelar(
     IN p_idprofesor INT,
     IN p_fecha_desde DATE,
@@ -263,12 +257,13 @@ BEGIN
 END //
 DELIMITER ;
 
--- Datos
-INSERT INTO `profesor` (`idprofesor`, `nombre_profesor`, `legajo`, `correo`, `observaciones`) 
-VALUES (NULL, 'Martin, Gimenez', '42798', 'test@gmail.com', 'observacion 1');
+-- Datos iniciales
+INSERT INTO profesor (nombre_profesor, legajo, correo, observaciones) 
+VALUES ('Martin, Gimenez', '42798', 'test@gmail.com', 'observacion 1');
 
 INSERT INTO usuarios (usuario, password, idprofesor) 
 VALUES ('admin', MD5('password123'), 1);
 
-INSERT INTO `materia` (`idmateria`, `nombre_materia`, `cod_materia`) VALUES (NULL, 'Simulación', 'S354');
-INSERT INTO `materia` (`idmateria`, `nombre_materia`, `cod_materia`) VALUES (NULL, 'Inteligencia Artificial', 'S489');
+INSERT INTO materia (nombre_materia, cod_materia) VALUES 
+('Simulación', 'S354'),
+('Inteligencia Artificial', 'S489');

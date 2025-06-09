@@ -1,7 +1,7 @@
 <?php
 class Conexion {
   public static function Conectar() {
-    define('servidor', 'localhost');
+    define('servidor', 'db'); // nombre del servicio en docker-compose.yml
     define('nombre_bd', 'gestion_consultas');
     define('usuario', 'userdb');
     define('password', 'userdbpass');

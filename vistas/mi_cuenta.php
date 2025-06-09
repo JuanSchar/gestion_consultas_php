@@ -1,3 +1,4 @@
+<?php include("../auth.php"); ?>
 <!DOCTYPE html>
 <html>
 
@@ -56,7 +57,11 @@
                     <div class="col-lg-6">
                       <div class="form-group">
                         <label class="form-control-label" for="input-first-name">Nombre</label>
-                        <input name="nombre" type="text" id="input-first-name" class="form-control" placeholder="Nombre" value="<?php echo explode(", ", $data["nombre_profesor"])[1] ?>">
+                        <?php
+                          $nombre_completo = explode(", ", $data["nombre_profesor"]);
+                          $nombre = isset($nombre_completo[1]) ? $nombre_completo[1] : "";
+                        ?>
+                        <input name="nombre" type="text" id="input-first-name" class="form-control" placeholder="Nombre" value="<?php echo $nombre ?>">
                       </div>
                     </div>
                     <div class="col-lg-6">
