@@ -73,7 +73,7 @@ CREATE TABLE consultas (
     idconsultas INT AUTO_INCREMENT PRIMARY KEY,
     idalumno INT NOT NULL,
     idconsultas_horario INT NOT NULL,
-    fecha DATE NOT NULL,
+    fecha DATE NULL,
     estado ENUM('Pendiente','Confirmado','Rechazado') DEFAULT 'Pendiente',
     FOREIGN KEY (idalumno) REFERENCES alumno(idalumno),
     FOREIGN KEY (idconsultas_horario) REFERENCES consultas_horario(idconsultas_horario)
@@ -99,6 +99,7 @@ SELECT
     c.fecha,
     CONCAT(ch.hora_ini, ' - ', ch.hora_fin) AS hora_ini_fin,
     CONCAT(a.nombre, ' ', a.apellido) AS nombre,
+    ch.dia,
     a.correo
 FROM 
     consultas c
@@ -162,6 +163,7 @@ BEGIN
         ch.fecha_consulta AS fecha_gen,
         ch.hora_ini,
         ch.hora_fin,
+        ch.dia,
         COUNT(c.idconsultas) AS cantidad_alumnos
     FROM 
         consultas_horario ch
@@ -173,6 +175,7 @@ BEGIN
         ch.idprofesor = p_idprofesor
         AND ch.estado IN ('Activo', 'Aceptada')  -- Ampliar estados válidos
         AND ch.fecha_consulta >= CURDATE()  -- Solo futuras
+        AND (c.fecha >= CURDATE())
     GROUP BY 
         ch.idconsultas_horario
     ORDER BY 
@@ -272,3 +275,6 @@ VALUES ('admin', MD5('password123'), 1);
 
 INSERT INTO `materia` (`idmateria`, `nombre_materia`, `cod_materia`) VALUES (NULL, 'Simulación', 'S354');
 INSERT INTO `materia` (`idmateria`, `nombre_materia`, `cod_materia`) VALUES (NULL, 'Inteligencia Artificial', 'S489');
+
+INSERT INTO `materias_profesores` (`id`, `idmateria`, `idprofesor`) VALUES 
+(1, 1, 1), (2, 3, 1), (5, 2, 1), (3, 2, 2), (4, 3, 2);

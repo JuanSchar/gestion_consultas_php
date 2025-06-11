@@ -1,5 +1,4 @@
-
-
+<?php include("../auth.php"); ?>
 <!DOCTYPE html>
 
 <head>
@@ -64,74 +63,129 @@
   </script>
 
   <?php
+  // Configuración de errores
+  error_reporting(E_ALL);
+  ini_set('display_errors', 1);
+  ini_set('log_errors', 1);
+  ini_set('error_log', __DIR__.'/upload_errors.log');
+
   require '../vendor/autoload.php';
   require '../bd/conexion.php';
 
   if (isset($_POST['upload'])) {
-    $file_name = $_FILES['file']['name'];
-    $file_type = $_FILES['file']['type'];
-    $file_size = $_FILES['file']['size'];
-    $file_tem_loc = $_FILES['file']['tmp_name'];
-    $file_store = ".." . $file_name;
-    move_uploaded_file($file_tem_loc, $file_store);
-    $objeto = new Conexion();
-
-    $conexion = $objeto->Conectar();
-    $array_consultas = array();
-
-    //Variable con el nombre del archivo
-    $nombreArchivo = "../upload-excel/" . $file_name;
-    // Cargo la hoja de cálculo
-    $objPHPExcel = PhpOffice\PhpSpreadsheet\IOFactory::load($nombreArchivo);
-
-    //Asigno la hoja de calculo activa
-    $objPHPExcel->setActiveSheetIndex(0);
-    //Obtengo el numero de filas del archivo
-    $numRows = $objPHPExcel->setActiveSheetIndex(0)->getHighestRow();
-
-    for ($i = 2; $i <= $numRows; $i++) {
-      $legajo = $objPHPExcel->getActiveSheet()->getCell('A' . $i)->getCalculatedValue();
-      $materia = $objPHPExcel->getActiveSheet()->getCell('B' . $i)->getCalculatedValue();
-      $inicioHora = $objPHPExcel->getActiveSheet()->getCell('C' . $i)->getCalculatedValue();
-      $inicioMin = $objPHPExcel->getActiveSheet()->getCell('D' . $i)->getCalculatedValue();
-      $finHora = $objPHPExcel->getActiveSheet()->getCell('E' . $i)->getCalculatedValue();
-      $finMin = $objPHPExcel->getActiveSheet()->getCell('F' . $i)->getCalculatedValue();
-      $dia = $objPHPExcel->getActiveSheet()->getCell('G' . $i)->getCalculatedValue();
-      $id_dia = $objPHPExcel->getActiveSheet()->getCell('H' . $i)->getCalculatedValue();
-
-      if($inicioMin == 0){
-        $inicioMin = "00";
+    try {
+      // Validación de archivo
+      if (!isset($_FILES['file']['error']) || is_array($_FILES['file']['error'])) {
+        throw new Exception('Parámetros de archivo inválidos');
       }
-      if($finMin == 0){
-        $finMin = "00";
+
+      // Mover archivo a directorio seguro
+      $uploadDir = "../upload-excel/";
+      if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
       }
-      $sql = "
-      start transaction;
-      drop temporary table if exists TMP_consultas;
-      create temporary table if not exists TMP_consultas (legajo int , 
-                                                      cod_materia varchar(45), 
-                                                      dia varchar(45), 
-                                                      hora_inicio varchar(45), 
-                                                      min_inicio varchar(45),
-                                                      min_fin varchar(45),
-                                                      hora_fin varchar(45),
-                                                      id_dia int) ;
-      INSERT INTO TMP_consultas (legajo, cod_materia,dia, hora_inicio, min_inicio, hora_fin, min_fin, id_dia) 
-      VALUES('$legajo','$materia','$dia', '$inicioHora', '$inicioMin', '$finHora', '$finMin', '$id_dia');
+
+      $fileName = uniqid().'_'.$_FILES['file']['name'];
+      $filePath = $uploadDir.$fileName;
       
-      insert into consultas_horario (idprofesor,idmateria,dia, hora_ini, Hora_fin, estado, Fecha_carga, id_dia)
-      select distinct  p.idprofesor, m.idmateria,dia, concat(c.hora_inicio,':',c.min_inicio), concat(c.hora_fin,':',c.min_fin), 'Aceptada', current_date(), c.id_dia
-      from TMP_consultas c 
-      left join profesor p 
-              on c.legajo=p.legajo
-      left join materia m 
-              on upper(m.cod_materia)=upper(c.cod_materia);
-      commit;
-      ";
-      $resultado = $conexion->prepare($sql);
-      $resultado->execute();
+      if (!move_uploaded_file($_FILES['file']['tmp_name'], $filePath)) {
+        throw new Exception('Error al guardar el archivo');
+      }
 
-      echo "<script> showModal(); </script>";
+      // Conexión a base de datos (asegurando que $conexion esté definida)
+      $objeto = new Conexion();
+      $conexion = $objeto->Conectar();
+      
+      if (!$conexion) {
+        throw new Exception('No se pudo establecer conexión con la base de datos');
+      }
+
+      // Configurar colación consistente
+      $conexion->exec("SET NAMES 'utf8mb4' COLLATE 'utf8mb4_general_ci'");
+
+      // Cargar archivo Excel
+      $spreadsheet = PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+      $sheet = $spreadsheet->getActiveSheet();
+      $numRows = $sheet->getHighestRow();
+
+      // Iniciar transacción
+      $conexion->beginTransaction();
+
+      // Crear tabla temporal con colación explícita
+      $conexion->exec("DROP TEMPORARY TABLE IF EXISTS TMP_consultas");
+      $conexion->exec("
+        CREATE TEMPORARY TABLE TMP_consultas (
+          legajo INT, 
+          cod_materia VARCHAR(45) COLLATE utf8mb4_general_ci, 
+          dia VARCHAR(45) COLLATE utf8mb4_general_ci, 
+          hora_inicio VARCHAR(45), 
+          min_inicio VARCHAR(45),
+          hora_fin VARCHAR(45),
+          min_fin VARCHAR(45),
+          id_dia INT
+        ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+      ");
+
+      // Preparar statement para inserción temporal
+      $insertTemp = $conexion->prepare("
+        INSERT INTO TMP_consultas 
+        (legajo, cod_materia, dia, hora_inicio, min_inicio, hora_fin, min_fin, id_dia) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ");
+
+      // Procesar filas del Excel
+      for ($i = 2; $i <= $numRows; $i++) {
+        $legajo = $sheet->getCell('A'.$i)->getCalculatedValue();
+        $materia = $sheet->getCell('B'.$i)->getCalculatedValue();
+        $inicioHora = $sheet->getCell('C'.$i)->getCalculatedValue();
+        $inicioMin = $sheet->getCell('D'.$i)->getCalculatedValue() ?: '00';
+        $finHora = $sheet->getCell('E'.$i)->getCalculatedValue();
+        $finMin = $sheet->getCell('F'.$i)->getCalculatedValue() ?: '00';
+        $dia = $sheet->getCell('G'.$i)->getCalculatedValue();
+        $id_dia = $sheet->getCell('H'.$i)->getCalculatedValue();
+
+        $insertTemp->execute([
+          $legajo, $materia, $dia, 
+          $inicioHora, $inicioMin, 
+          $finHora, $finMin, $id_dia
+        ]);
+      }
+
+      // Consulta final con manejo de colaciones
+      $insertFinal = $conexion->prepare("
+        INSERT INTO consultas_horario 
+        (idprofesor, idmateria, dia, hora_ini, Hora_fin, estado, Fecha_carga, id_dia)
+        SELECT 
+          p.idprofesor, 
+          m.idmateria,
+          c.dia, 
+          CONCAT(c.hora_inicio, ':', c.min_inicio), 
+          CONCAT(c.hora_fin, ':', c.min_fin), 
+          'Aceptada', 
+          CURRENT_DATE(), 
+          c.id_dia
+        FROM TMP_consultas c 
+        LEFT JOIN profesor p ON c.legajo = p.legajo COLLATE utf8mb4_general_ci
+        LEFT JOIN materia m ON m.cod_materia = c.cod_materia COLLATE utf8mb4_general_ci
+        WHERE p.idprofesor IS NOT NULL AND m.idmateria IS NOT NULL
+      ");
+      $insertFinal->execute();
+      $rowCount = $insertFinal->rowCount();
+      $conexion->commit();
+
+      echo "<script> showModal();</script>";
+    } catch (Exception $e) {
+      // Rollback en caso de error
+      if (isset($conexion)) {
+        $conexion->rollBack();
+      }
+      error_log("Error: " . $e->getMessage());
+      echo "<script>alert('Error: " . addslashes($e->getMessage()) . "');</script>";
+    } finally {
+      // Eliminar archivo temporal
+      if (isset($filePath) && file_exists($filePath)) {
+        unlink($filePath);
+      }
     }
   }
 

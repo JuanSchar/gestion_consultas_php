@@ -136,25 +136,36 @@
                   echo ' <form class="form" action="" method="POST">';
                   foreach ($data as $fila) {
                     if ($fila["fecha"] == null) {
-                      $new_date = "Sin fecha";
+                      $new_date = 'Todos los ' . $fila["dia"];
+                      $fecha_data = 'null';
+                      $fecha_id = 'null';
+                      $dia_data = $fila["dia"];
+                      $hora_fin_data = $fila["hora_fin"];
                     } else {
                       $date = strtotime($fila["fecha"]);
                       $new_date = date('d-m-Y', $date);
+                      $fecha_data = $fila["fecha"];
+                      $fecha_id = str_replace('-', '', $fila["fecha"]);
+                      $dia_data = '';
+                      $hora_fin_data = '';
                     }
+
                     echo '<tr>';
-                    echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
-                    echo '<td>' .   $new_date . '</td>';
-                    echo '<td>' . $fila["nombre_profesor"] . '</td>';
-                    echo '<td>' . $fila["dia"] . '</td>';
-                    echo '<td>' . $fila["hora_ini"] . '</td>';
-                    echo ' <td> <input type="button" 
-                                id="aceptar' . $fila["fecha"] . $fila["hora_ini"] . $fila["idconsultas_horario"] . '" 
-                                name="aceptar' . $fila["fecha"] . $fila["hora_ini"] . $fila["idconsultas_horario"] . '" 
-                                data-fecha=' . $fila["fecha"] . ' 
-                                data-idconsultas_horario=' . $fila["idconsultas_horario"] . ' 
-                                class="btn btn-outline-primary btn-sm openModal" value="ANOTARME"
-                                data-toggle="modal" data-target="#ModalDatosAlumnos" />  
-                            </td>';
+                    echo '<td><b>' . htmlspecialchars($fila["nombre_materia"]) . '</b></td>';
+                    echo '<td>' . htmlspecialchars($new_date) . '</td>';
+                    echo '<td>' . htmlspecialchars($fila["nombre_profesor"]) . '</td>';
+                    echo '<td>' . htmlspecialchars($fila["dia"]) . '</td>';
+                    echo '<td>' . htmlspecialchars($fila["hora_ini"]) . ' - ' . htmlspecialchars($fila["hora_fin"]) .'</td>';
+
+                    echo '<td> <input type="button" '
+                                . 'id="aceptar' . $fecha_id . $fila["hora_ini"] . $fila["idconsultas_horario"] . '" '
+                                . 'name="aceptar' . $fecha_id . $fila["hora_ini"] . $fila["idconsultas_horario"] . '" '
+                                . 'data-fecha="' . htmlspecialchars($fecha_data) . '" '
+                                . 'data-idconsultas_horario="' . htmlspecialchars($fila["idconsultas_horario"]) . '" '
+                                . ($fecha_data === 'null' ? 'data-dia="' . htmlspecialchars($dia_data) . '" data-hora_fin="' . htmlspecialchars($hora_fin_data) . '" ' : '')
+                                . 'class="btn btn-outline-primary btn-sm openModal" value="ANOTARME" '
+                                . 'data-toggle="modal" data-target="#ModalDatosAlumnos" />'
+                          . '</td>';
                     echo '</tr>';
                   }
                   echo '</form>';
@@ -249,7 +260,48 @@
 
     $(document).on("click", ".openModal", function () {
       var idconsultas_horario = document.activeElement.dataset.idconsultas_horario;
-      var fecha = document.activeElement.dataset.fecha;  
+      var fecha = document.activeElement.dataset.fecha;
+      // Si la fecha es null, calcular la próxima fecha del día correspondiente
+      if (fecha === 'null') {
+        var dia = document.activeElement.dataset.dia;
+        var horaFin = document.activeElement.dataset.hora_fin;
+        var diasSemana = {
+          'lunes': 1,
+          'martes': 2,
+          'miércoles': 3,
+          'miercoles': 3,
+          'jueves': 4,
+          'viernes': 5,
+          'sábado': 6,
+          'sabado': 6,
+          'domingo': 0
+        };
+        var hoy = new Date();
+        var diaActual = hoy.getDay(); // 0=domingo, 1=lunes, ...
+        var diaConsulta = diasSemana[dia.toLowerCase()];
+        var fechaConsulta = new Date(hoy);
+        var diferencia = (diaConsulta - diaActual + 7) % 7;
+        if (diferencia === 0) {
+          // Es hoy, comparar hora fin
+          var horaFinSplit = horaFin.split(":");
+          var horaFinDate = new Date(hoy);
+          horaFinDate.setHours(parseInt(horaFinSplit[0]), parseInt(horaFinSplit[1]), 0, 0);
+          if (hoy < horaFinDate) {
+            // Todavía no terminó, es hoy
+            // fechaConsulta ya es hoy
+          } else {
+            // Ya pasó, es el próximo martes
+            fechaConsulta.setDate(hoy.getDate() + 7);
+          }
+        } else {
+          fechaConsulta.setDate(hoy.getDate() + diferencia);
+        }
+        // Formatear a yyyy-mm-dd
+        var yyyy = fechaConsulta.getFullYear();
+        var mm = (fechaConsulta.getMonth() + 1).toString().padStart(2, '0');
+        var dd = fechaConsulta.getDate().toString().padStart(2, '0');
+        fecha = yyyy + '-' + mm + '-' + dd;
+      }
       $(".modal-body #fecha").val( fecha );
       $(".modal-body #idconsultas_horario").val( idconsultas_horario );
     });

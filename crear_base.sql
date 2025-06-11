@@ -119,6 +119,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `proximas_consultas` (IN `p_idprofes
         ch.fecha_consulta AS fecha_gen,
         ch.hora_ini,
         ch.hora_fin,
+        ch.dia,
         COUNT(c.idconsultas) AS cantidad_alumnos
     FROM 
         consultas_horario ch
@@ -129,7 +130,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `proximas_consultas` (IN `p_idprofes
     WHERE 
         ch.idprofesor = p_idprofesor
         AND ch.estado IN ('Activo', 'Aceptada')  -- Ampliar estados válidos
-        AND ch.fecha_consulta >= CURDATE()  -- Solo futuras
+        AND (ch.fecha_consulta >= CURDATE() || ch.fecha_consulta is null)  -- Solo futuras
+        AND (c.fecha >= CURDATE())
     GROUP BY 
         ch.idconsultas_horario
     ORDER BY 
@@ -172,7 +174,7 @@ CREATE TABLE `consultas` (
   `idconsultas` int(11) NOT NULL,
   `idalumno` int(11) NOT NULL,
   `idconsultas_horario` int(11) NOT NULL,
-  `fecha` date NOT NULL,
+  `fecha` date NULL,
   `estado` enum('Pendiente','Confirmado','Rechazado') DEFAULT 'Pendiente'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -236,38 +238,6 @@ CREATE TABLE `consultas_horarios_bloqueos` (
 
 INSERT INTO `consultas_horarios_bloqueos` (`id`, `idconsultas_horario`, `fecha_bloqueo`, `motivo`, `fecha_creacion`) VALUES
 (1, 17, '2025-05-02', 'No estoy ese día', '2025-05-01 15:08:40');
-
--- --------------------------------------------------------
-
---
--- Estructura Stand-in para la vista `consultas_pendientes_aprobacion`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `consultas_pendientes_aprobacion` (
-`id` int(11)
-,`nombre_materia` varchar(100)
-,`fecha` date
-,`hora_ini_fin` varchar(23)
-,`nombre` varchar(101)
-,`correo` varchar(100)
-);
-
--- --------------------------------------------------------
-
---
--- Estructura Stand-in para la vista `consultas_pendientes_aprobacion_admin`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `consultas_pendientes_aprobacion_admin` (
-`id` int(11)
-,`nombre_materia` varchar(100)
-,`nombre_profesor` varchar(100)
-,`legajo` varchar(20)
-,`fecha_consulta` date
-,`dia` varchar(10)
-,`hora_ini_fin` varchar(23)
-,`estado` enum('Activo','Inactivo','Pendiente','Aceptada','Rechazada')
-);
 
 -- --------------------------------------------------------
 
@@ -345,23 +315,23 @@ INSERT INTO `usuarios` (`idusuario`, `usuario`, `password`, `idprofesor`) VALUES
 (1, 'juanschar', '7a42f3f6148e2404542e1b4eade9a918', NULL),
 (2, 'testprof', '7a42f3f6148e2404542e1b4eade9a918', 1);
 
+INSERT INTO `materias_profesores` (`id`, `idmateria`, `idprofesor`) VALUES 
+(1, 1, 1), (2, 3, 1), (5, 2, 1), (3, 2, 2), (4, 3, 2);
 -- --------------------------------------------------------
 
 --
 -- Estructura para la vista `consultas_pendientes_aprobacion`
 --
-DROP TABLE IF EXISTS `consultas_pendientes_aprobacion`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `consultas_pendientes_aprobacion`  AS SELECT `c`.`idconsultas` AS `id`, `m`.`nombre_materia` AS `nombre_materia`, `c`.`fecha` AS `fecha`, concat(`ch`.`hora_ini`,' - ',`ch`.`hora_fin`) AS `hora_ini_fin`, concat(`a`.`nombre`,' ',`a`.`apellido`) AS `nombre`, `a`.`correo` AS `correo` FROM (((`consultas` `c` join `alumno` `a` on(`c`.`idalumno` = `a`.`idalumno`)) join `consultas_horario` `ch` on(`c`.`idconsultas_horario` = `ch`.`idconsultas_horario`)) join `materia` `m` on(`ch`.`idmateria` = `m`.`idmateria`)) WHERE `c`.`estado` = 'Pendiente' ;
+CREATE VIEW `consultas_pendientes_aprobacion`  AS SELECT `c`.`idconsultas` AS `id`, `m`.`nombre_materia` AS `nombre_materia`, `c`.`fecha` AS `fecha`, `ch`.`dia` AS `dia`, concat(`ch`.`hora_ini`,' - ',`ch`.`hora_fin`) AS `hora_ini_fin`, concat(`a`.`nombre`,' ',`a`.`apellido`) AS `nombre`, `a`.`correo` AS `correo` FROM (((`consultas` `c` join `alumno` `a` on(`c`.`idalumno` = `a`.`idalumno`)) join `consultas_horario` `ch` on(`c`.`idconsultas_horario` = `ch`.`idconsultas_horario`)) join `materia` `m` on(`ch`.`idmateria` = `m`.`idmateria`)) WHERE `c`.`estado` = 'Pendiente' ;
 
 -- --------------------------------------------------------
 
 --
 -- Estructura para la vista `consultas_pendientes_aprobacion_admin`
 --
-DROP TABLE IF EXISTS `consultas_pendientes_aprobacion_admin`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `consultas_pendientes_aprobacion_admin`  AS SELECT `ch`.`idconsultas_horario` AS `id`, `m`.`nombre_materia` AS `nombre_materia`, `p`.`nombre_profesor` AS `nombre_profesor`, `p`.`legajo` AS `legajo`, `ch`.`fecha_consulta` AS `fecha_consulta`, `ch`.`dia` AS `dia`, concat(`ch`.`hora_ini`,' - ',`ch`.`hora_fin`) AS `hora_ini_fin`, `ch`.`estado` AS `estado` FROM ((`consultas_horario` `ch` join `materia` `m` on(`ch`.`idmateria` = `m`.`idmateria`)) join `profesor` `p` on(`ch`.`idprofesor` = `p`.`idprofesor`)) WHERE `ch`.`estado` = 'Pendiente' ;
+CREATE VIEW `consultas_pendientes_aprobacion_admin`  AS SELECT `ch`.`idconsultas_horario` AS `id`, `m`.`nombre_materia` AS `nombre_materia`, `p`.`nombre_profesor` AS `nombre_profesor`, `p`.`legajo` AS `legajo`, `ch`.`fecha_consulta` AS `fecha_consulta`, `ch`.`dia` AS `dia`, concat(`ch`.`hora_ini`,' - ',`ch`.`hora_fin`) AS `hora_ini_fin`, `ch`.`estado` AS `estado` FROM ((`consultas_horario` `ch` join `materia` `m` on(`ch`.`idmateria` = `m`.`idmateria`)) join `profesor` `p` on(`ch`.`idprofesor` = `p`.`idprofesor`)) WHERE `ch`.`estado` = 'Pendiente' ;
 
 --
 -- Índices para tablas volcadas

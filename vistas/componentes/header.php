@@ -10,7 +10,7 @@
   <div class="header bg-primary">
     <div class="container-fluid">
       <div class="header-body">
-        <div style="padding: 16px" class="col-lg-6 col-7">
+        <div style="padding: 16px" class="col-lg-6">
           <h2 class="text-white"><?php echo"$title"; ?></h2>
         </div>
       </div>
