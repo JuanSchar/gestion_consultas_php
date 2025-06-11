@@ -36,7 +36,6 @@
                     <th scope="col">Inicio - Fin</th>
                     <th scope="col">Alumno</th>
                     <th scope="col">Acción</th>
-                  
                   </tr>
                 </thead>
                 <tbody class="list">
@@ -62,8 +61,12 @@
                   if ($resultado->rowCount() > 0) {
                     echo '<form id="accionBoton" class="form" action="" method="POST">';
                     foreach($data as $fila) {
-                      $date = strtotime($fila["fecha"]);
-                      $new_date = date('d-m-Y', $date);
+                      if ($fila["fecha"] == null) {
+                        $new_date = 'Todos los ' . $fila["dia"];
+                      } else {
+                        $date = strtotime($fila["fecha"]);
+                        $new_date = date('d-m-Y', $date);
+                      }
                       echo '<tr>';
                         echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
                         echo '<td>' . $new_date . '</td>';

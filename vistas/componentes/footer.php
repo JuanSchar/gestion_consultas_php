@@ -1,11 +1,11 @@
-<footer class="page-footer font-small pt-4" style="background-color: #5e72e4;">
+<footer class="page-footer font-small pt-4 bg-primary">
   <div class="container-fluid text-center text-md-left">
     <div class="row">
       <div class="col-md-6 mt-md-0 mt-3 text-white">
         <h1>Universidad Tecnológica Nacional</h1>
         <p class="text-uppercase text-white">FACULTAD REGIONAL ROSARIO</p>
         <p>ZEBALLOS 1341 - S2000BQA - ROSARIO</p>
-        <p>Para comentarios, soporte o mejoras podés contactarnos clickeando <a href="mailto:consultas@gestionconsultasutn.ddns.net"><b>aqui</b></a>!</p>
+        <p>Para comentarios, soporte o mejoras podés contactarnos clickeando <a class="text-white" href="mailto:consultas@gestionconsultasutn.ddns.net"><b>aqui</b></a>!</p>
       </div>
       <hr class="clearfix w-100 d-md-none pb-3">
       <div class="col-md-6 mb-md-0 mb-3 text-white">

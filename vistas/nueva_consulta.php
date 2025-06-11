@@ -32,7 +32,7 @@
               <form class="filter" id="nueva_consulta" action="../controller/solicitar_consulta.php" method="POST">
                 <div class="pl-lg-12">
                   <div class="row">
-                    <div class="col-lg-3">
+                    <div class="col-lg-6">
                       <div class="form-group">
                         <?php
                         $objeto = new Conexion();
@@ -47,7 +47,7 @@
 
                         if ($resultado->rowCount() > 0) {
                           echo '<label class="form-control-label" for="materia">Materia</label>
-                                            <select name="materia" id="materia" class="form-control" >';
+                                  <select name="materia" id="materia" class="form-control" >';
                           foreach ($data as $fila) {
                             echo '<option value=' . $fila['idmateria'] . '>' . $fila['nombre_materia'] . '</option>';
                           }
@@ -58,7 +58,7 @@
                         </select>
                       </div>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-6">
                       <div class="form-group">
                         <label class="form-control-label" for="dia">Día</label>
                         <select name="dia" id="dia" class="form-control">
@@ -70,16 +70,18 @@
                           <option value=4>Viernes</option>
                         </select>
                       </div>
-                      <input name="se_repite" class="form-check-input" type="checkbox" checked id="se_repite">
-                      <label class="form-check-label" for="se_repite">Se repite</label>
+                      <div class="form-group ml-4">
+                        <input name="se_repite" class="form-check-input" type="checkbox" checked id="se_repite">
+                        <label class="form-check-label" for="se_repite">Se repite</label>
+                      </div>
                     </div>
-                    <div class="col-lg-1">
+                    <div class="col-lg-3">
                       <div class="form-group">
                         <label class="form-control-label" for="hora_desde">Hora desde:</label>
                         <input id="hora_desde" type="time" name="hora_desde" value="00:00" class="form-control">
                       </div>
                     </div>
-                    <div class="col-lg-1">
+                    <div class="col-lg-3">
                       <div class="form-group">
                         <label class="form-control-label" for="hora_hasta">Hora hasta:</label>
                         <input id="hora_hasta" type="time" name="hora_hasta" value="00:00" class="form-control">
@@ -93,7 +95,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-12 col-sm-12 col-lg-2 p-2">
+                    <div class="col-12 col-sm-12 col-lg-2">
                       <div class="form-group">
                         <br>
                         <input value="Solicitar" type="submit" class="btn btn-outline-primary" id="solicitar" name="solicitar">
@@ -113,11 +115,8 @@
         </div>
       </div>
     </div>
-    <br>
-    <br>
-    <br>
 
-    <div class="container-fluid mt--6">
+    <div class="container-fluid">
       <div class="row">
         <div class="col">
           <div class="card">

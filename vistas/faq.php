@@ -49,7 +49,7 @@
                     echo '     <li>Aceptar</li>';
                     echo '     <li>Rechazar</li>';
                     echo ' </ul>';
-                    echo ' <p> Al seleccionar cada uno acepta o rechaza, respectivamente, una consulta pedida por un alimno </p>';
+                    echo ' <p> Al seleccionar cada uno acepta o rechaza, respectivamente, una consulta pedida por un alumno </p>';
                   echo '</div>';
 
                   echo ' <div>';

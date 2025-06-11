@@ -54,7 +54,7 @@
                         <input type="date" id="fecha" name="fecha" class="form-control">
                       </div>
                     </div>
-                    <div class="col-12 col-sm-12 col-lg-2 p-2">
+                    <div class="col-12 col-sm-12 col-lg-2">
                       <div class="form-group">
                         <br>
                         <input value="Buscar" type="submit" class="btn btn-outline-primary" id="buscar2" name="buscar2">

@@ -1,51 +1,76 @@
 <?php 
 session_start();
-
 include_once '../bd/conexion.php';
+
 try {
-$objeto = new Conexion();
-$conexion = $objeto->Conectar();
+  $objeto = new Conexion();
+  $conexion = $objeto->Conectar();
+  $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$idconsultas_horario = (isset($_POST['idconsultas_horario'])) ? $_POST['idconsultas_horario'] : '';
-$idtiempo = (isset($_POST['fecha'])) ? $_POST['fecha'] : '';
-$legajo =(isset($_POST['legajo'])) ? $_POST['legajo'] : '' ;
-$nombre =(isset($_POST['nombre'])) ? $_POST['nombre'] : '' ;
-$apellido =(isset($_POST['apellido'])) ? $_POST['apellido'] : '' ;
-$correo =(isset($_POST['correo'])) ? $_POST['correo'] : '' ; 
+  // Obtener datos del formulario
+  $idconsultas_horario = $_POST['idconsultas_horario'] ?? '';
+  $idtiempo = $_POST['fecha'] ?? null;
+  if ($idtiempo === '' || $idtiempo === 'null') {
+    $idtiempo = null;  // Pasa valor NULL en vez de string vacío
+  }
+  $legajo = $_POST['legajo'] ?? '';
+  $nombre = $_POST['nombre'] ?? '';
+  $apellido = $_POST['apellido'] ?? '';
+  $correo = $_POST['correo'] ?? '';
 
-$resultado = $conexion->prepare(' 
-START TRANSACTION;
+  // Iniciar transacción
+  $conexion->beginTransaction();
 
-insert into alumno(legajo, nombre, correo)
-select j.legajo, j.nombre, j.correo from (select ? legajo, upper(concat(?, " ", ? ))nombre, ? correo) j
-left join alumno a on j.legajo=a.legajo
-where a.legajo is null;
+  // 1. Insertar alumno si no existe
+  $stmt1 = $conexion->prepare("
+    INSERT INTO alumno (legajo, nombre, apellido, correo)
+    SELECT j.legajo, j.nombre, j.apellido, j.correo
+    FROM (
+      SELECT ? AS legajo, UPPER(?) AS nombre, UPPER(?) AS apellido, ? AS correo
+    ) j
+    LEFT JOIN alumno a ON j.legajo = a.legajo
+    WHERE a.legajo IS NULL
+  ");
+  $stmt1->execute([$legajo, $nombre, $apellido, $correo]);
 
-update  alumno a
-join  (select ? legajo, upper(concat(?, " ", ? ))nombre, ? correo) j on j.legajo=a.legajo
-set a.nombre= j.nombre, 
-a.correo= j.correo;
+  // 2. Actualizar si ya existe
+  $stmt2 = $conexion->prepare("
+    UPDATE alumno a
+    JOIN (
+      SELECT ? AS legajo, UPPER(?) AS nombre, UPPER(?) AS apellido, ? AS correo
+    ) j ON j.legajo = a.legajo
+    SET a.nombre = j.nombre,
+      a.apellido = j.apellido,
+      a.correo = j.correo
+  ");
+  $stmt2->execute([$legajo, $nombre, $apellido, $correo]);
 
-COMMIT;
-START TRANSACTION;
-set @idalumno = (select idalumno from alumno where legajo = ?);
+  // 3. Obtener idalumno
+  $stmt3 = $conexion->prepare("SELECT idalumno FROM alumno WHERE legajo = ?");
+  $stmt3->execute([$legajo]);
+  $idalumno = $stmt3->fetchColumn();
 
-insert into consultas( idalumno, estado, idconsultas_horario, fecha)
-select @idalumno, "Pendiente", ? , ?
-from alumno a 
-Where a.legajo=?;
-COMMIT;
+  if (!$idalumno) {
+    throw new Exception("No se encontró el alumno con legajo: $legajo");
+  }
 
-');
-$retorno = $resultado->execute([$legajo, $nombre, $apellido, $correo, $legajo, $nombre, $apellido, $correo, $legajo, $idconsultas_horario, $idtiempo, $legajo ]);
+  // 4. Insertar la consulta
+  $stmt4 = $conexion->prepare("
+    INSERT INTO consultas(idalumno, estado, idconsultas_horario, fecha)
+    VALUES (?, 'Pendiente', ?, ?)
+  ");
+  $retorno = $stmt4->execute([$idalumno, $idconsultas_horario, $idtiempo]);
 
-print $retorno;
+  // Confirmar transacción
+  $conexion->commit();
 
-header("Location: ../index.php?retorno=" . $retorno);
+  header("Location: ../index.php?retorno=1");
+  exit;
 
-} catch (PDOException $e) {
-    echo '{"error":{"text":'. $e->getMessage() .'}}';
- 
+} catch (Exception $e) {
+  if ($conexion->inTransaction()) {
+    $conexion->rollBack();
+  }
+  echo '{"error":{"text":' . json_encode($e->getMessage()) . '}}';
 }
 ?>
-

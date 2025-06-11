@@ -96,9 +96,12 @@
                         if (!isset($_SESSION["s_profesor"])) {
                           echo '<td>' . $fila["nombre_profesor"] . '</td>';
                         }
-
-                        $date = strtotime($fila["fecha_gen"]);
-                        $new_date = date('d-m-Y', $date);
+                        if ($fila["fecha_gen"] == null) {
+                          $new_date = $fila["dia"];
+                        } else {
+                          $date = strtotime($fila["fecha_gen"]);
+                          $new_date = date('d-m-Y', $date);
+                        }
                         echo '<td>' .   $new_date . '</td>';
                         echo '<td>' . $fila["hora_ini"] . ' - ' . $fila["hora_fin"] . '</td>';
                         echo '<td>' . $fila["cantidad_alumnos"] . '</td>';
