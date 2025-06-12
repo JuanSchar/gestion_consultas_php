@@ -1,2 +1,4 @@
 
 *.xlsx
+vendor/
+node_modules/
