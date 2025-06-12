@@ -1,4 +1,6 @@
 
 *.xlsx
-vendor/
-node_modules/
+/vendor/
+/node_modules/
+/.env
+*.log
