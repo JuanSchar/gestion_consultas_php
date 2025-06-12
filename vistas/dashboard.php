@@ -22,7 +22,7 @@
     <?php include("componentes/navbar.php") ?>
 
     <div>
-      <div class="container-fluid">
+      <div class="container-fluid pt-4">
         <div class="row">
           <?php $cardnum = "1";
           include("componentes/dashboard_cards.php") ?>
@@ -136,9 +136,8 @@
         </div>
       </div>
     </div>
-    <br>
 
-    <div class="container-fluid mt--6">
+    <div class="container-fluid">
       <div class="row">
         <div class="col-xl-12">
           <div class="card">
