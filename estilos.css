@@ -288,13 +288,24 @@ textarea {
 	background-color: #f5365c;
 }
 
-.order-xl-1 {
-	order: 1;
+.btn-outline-warning {
+	color: #bfa14a;
+	border-color: #bfa14a;
+	background-color: transparent;
+	background-image: none;
 }
 
-.mt--6,
-.my--6 {
-	margin-top: -4.5rem !important;
+.btn-outline-warning:hover {
+	color: #fff;
+	border-color: #bfa14a;
+	background-color: #bfa14a;
+}
+
+.btn-outline-warning:not(:disabled):not(.disabled):active {
+	color: #fff;
+	border-color: #bfa14a;
+	background-color: #bfa14a;
+	box-shadow: 0 0 0 0 rgba(191, 161, 74, .5);
 }
 
 .text-muted {
@@ -1598,7 +1609,7 @@ a.text-neutral:focus {
 }
 
 .btn-outline-secondary {
-	color: #4385b1;
+	color: #6c757d;
 }
 
 .card {
