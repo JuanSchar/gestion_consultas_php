@@ -9,7 +9,7 @@
 
 <body>
   <div class="d-flex bg-blue-dark sidenav-header align-items-center">
-    <nav class="navbar navbar-top navbar-expand navbar-dark w-75">
+    <nav class="navbar navbar-top navbar-expand bg-blue-dark w-75">
       <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav align-items-center  ml-md-auto ">
