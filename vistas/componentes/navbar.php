@@ -33,7 +33,7 @@
           <a class="nav-link pr-0 text-white" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <div class="media align-items-center">
               <span class="avatar avatar-sm rounded-circle">
-                <img alt="imagen_usuario" src="..\..\img\img_logo.jpg">
+                <img alt="imagen_usuario" width="36" height="36" src="..\..\img\img_logo.webp">
               </span>
               <div class="ml-2">
                 <span><?php echo isset($_SESSION["s_profesor"]) ? $_SESSION["s_nombre_profesor"]: $_SESSION["s_usuario"];?></span>

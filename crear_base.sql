@@ -109,7 +109,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `filtro_consultas` (IN `p_idmateria`
     WHERE 
         (p_idmateria = -1 OR ch.idmateria = p_idmateria) AND
         (p_idprofesor = -1 OR ch.idprofesor = p_idprofesor) AND
-        ch.estado = 'Aceptada';
+        ch.estado = 'Aceptada' AND
+        (ch.fecha_consulta >= CURDATE() OR ch.fecha_consulta IS NULL);
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `proximas_consultas` (IN `p_idprofesor` INT, IN `p_offset` INT, IN `p_limit` INT)   BEGIN
@@ -312,8 +313,9 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`idusuario`, `usuario`, `password`, `idprofesor`) VALUES
-(1, 'juanschar', '7a42f3f6148e2404542e1b4eade9a918', NULL),
-(2, 'testprof', '7a42f3f6148e2404542e1b4eade9a918', 1);
+(1, 'admin', '7a42f3f6148e2404542e1b4eade9a918', NULL),
+(2, 'Test Prof', '7a42f3f6148e2404542e1b4eade9a918', 1);
+(3, 'Profesor 2', '7a42f3f6148e2404542e1b4eade9a918', 2);
 
 INSERT INTO `materias_profesores` (`id`, `idmateria`, `idprofesor`) VALUES 
 (1, 1, 1), (2, 3, 1), (5, 2, 1), (3, 2, 2), (4, 3, 2);

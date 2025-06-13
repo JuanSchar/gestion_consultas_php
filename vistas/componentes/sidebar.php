@@ -11,9 +11,9 @@
   <nav class="sidenav navbar navbar-vertical fixed-left navbar-expand-xs navbar-light bg-blue-light" id="sidenav-main">
     <div id="mySidenav" class="scrollbar-inner">
 
-      <div class="sidenav-header  align-items-center">
-        <a class="navbar-brand" href="javascript:void(0)">
-          <img src="..\..\img\LOGO.png" class="navbar-brand-img" alt="...">
+      <div class="sidenav-header align-items-center">
+        <a class="navbar-brand" href="../vistas/dashboard.php">
+          <img src="../../img/LOGO.png" width="30" height="30" class="navbar-brand-img" alt="Logo UTN">
         </a>
       </div>
       <div class="navbar-inner">
