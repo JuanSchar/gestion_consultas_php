@@ -1,14 +1,12 @@
 <?php include("../auth.php"); ?>
-
 <!DOCTYPE html>
-<html>
-
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Gestor de consultas UTN</title>
+  <meta name="description" content="Mi cuenta - Gestor de consultas UTN">
   <link rel="stylesheet" href="..\estilos.css" type="text/css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
   <link rel="stylesheet" href="\bootstrap/css/bootstrap.min.css">
 </head>
 
@@ -20,7 +18,6 @@
 
   <div class="main-content" id="panel">
     <?php include("componentes/navbar.php") ?>
-
     <?php 
       $resultado = $conexion->prepare('SELECT * FROM profesor WHERE idprofesor = ?;');
       $resultado->execute([$_SESSION["s_profesor"]]);
@@ -39,7 +36,6 @@
             </div>
             <div class="card-body">
               <form method="POST" action="<?php $_SERVER['PHP_SELF'] ?>">
-                <h6 class="heading-small text-muted mb-4">Informacion Usuario</h6>
                 <div class="pl-lg-4">
                   <div class="row">
                     <div class="col-lg-12">
@@ -71,13 +67,13 @@
 
                 <div class="pl-lg-4">
                   <div class="form-group">
-                    <label class="form-control-label">Observaciones</label>
-                    <textarea name="observaciones" rows="4" class="form-control" placeholder="Ingrese observaciones"><?php echo $data["observaciones"] ?></textarea>
+                    <label class="form-control-label" for="input-observaciones">Observaciones</label>
+                    <textarea name="observaciones" id="input-observaciones" rows="4" class="form-control" placeholder="Ingrese observaciones"><?php echo $data["observaciones"] ?></textarea>
                   </div>
                 </div>
                 <div class="pl-lg-4">
                   <div class="form-group">
-                  <input value="Guardar" type="submit" class="btn btn-outline-primary" id="guardar" name="guardar">
+                    <input value="Guardar" type="submit" class="btn btn-outline-primary" id="guardar" name="guardar">
                   </div>
                 </div>
                 <?php 
@@ -91,7 +87,7 @@
                     COMMIT;");
                     $retorno = $resultado->execute([$nombre_profesor, $_POST['observaciones'], $_POST['correo'], $_SESSION['s_profesor']]);
                     if ($retorno) {
-                      echo '<div class="correcto">Datos guardados correctamente.</div>';
+                      echo '<div class="p-2 alert-success rounded">Datos guardados correctamente.</div>';
                     }
                   }
                 ?>

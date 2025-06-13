@@ -1,7 +1,6 @@
 <?php include("../auth.php"); ?>
 <!DOCTYPE html>
-<html>
-
+<html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,7 +8,6 @@
   <link rel="stylesheet" href="..\estilos.css" type="text/css">
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
-
 </head>
 <body>
   <?php include("componentes/sidebar.php") ?>

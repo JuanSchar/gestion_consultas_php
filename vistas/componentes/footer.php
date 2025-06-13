@@ -9,7 +9,7 @@
       </div>
       <hr class="clearfix w-100 d-md-none pb-3">
       <div class="col-md-6 mb-md-0 mb-3 text-white">
-        <h5 class="text-uppercase">Links</h5>
+        <div class="text-uppercase text-white">Links</div>
         <ul class="list-unstyled text-white">
           <li >
             <a class="text-white" href="tel:03414481871">Contactos: 0341 - 4481871</a>

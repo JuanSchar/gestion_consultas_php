@@ -23,16 +23,15 @@
       $classcss = "bg-gradient-orange";
       $title = "Consultas para hoy";
       $letter = "H";
-      $sql = " select count(*) from consultas c 
-      join consultas_horario ch on c.idconsultas_horario=ch.idconsultas_horario
-      join profesor p on ch.idprofesor=p.idprofesor
-      left join usuarios u 
-        on ch.idprofesor=u.idprofesor and u.usuario=?
-      where ch.idprofesor= case when ? ='admin' then ch.idprofesor else u.idprofesor end 
-      and c.fecha=current_date();
-      ";
+      $sql = "SELECT count(*)
+              FROM consultas c
+              JOIN consultas_horario ch ON c.idconsultas_horario = ch.idconsultas_horario
+              JOIN profesor p ON ch.idprofesor = p.idprofesor
+              LEFT JOIN usuarios u ON ch.idprofesor = u.idprofesor AND u.usuario = ?
+              WHERE (? = 'admin' OR u.usuario = ?)
+              AND c.fecha = CURRENT_DATE();";
       $resultado = $conexion->prepare($sql);
-      $resultado->execute([$nombre_usuario, $nombre_usuario]);
+      $resultado->execute([$nombre_usuario, $nombre_usuario, $nombre_usuario]);
       $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
       if ($resultado->rowCount() == 0) {
         echo '<label class="text-white">ERROR</label>';
@@ -100,5 +99,3 @@
     </div>
   </div>
 </div>
-
-

@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>UTN - Módulo gestión consultas</title>
+  <meta name="description" content="Sistema para gestionar consultas en la UTN. Filtrá por profesor, materia y reservá tu lugar fácilmente.">
 
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.min.css">
