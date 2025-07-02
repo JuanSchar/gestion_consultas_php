@@ -15,7 +15,9 @@
   <?php include("componentes/sidebar.php") ?>
   <?php include("../bd/conexion.php");
   $objeto = new Conexion();
-  $conexion = $objeto->Conectar(); ?>
+  $conexion = $objeto->Conectar();
+  // Determinar el parámetro de profesor (-1 para admin, id para profesor)
+  $param_profesor = isset($_SESSION["s_profesor"]) ? $_SESSION["s_profesor"] : -1; ?>
 
   <div class="main-content" id="panel">
     <?php include("componentes/navbar.php") ?>
@@ -61,7 +63,7 @@
                   <tr>
                     <th scope="col">Materia</th>
                     <?php
-                    if (!isset($_SESSION["s_profesor"])) {
+                    if ($param_profesor == -1) {
                       echo '<th scope="col">Profesor</th>';
                     }
                     ?>
@@ -74,7 +76,7 @@
                   <?php
                   $Cant_por_Pag = 5;
                   $resultado = $conexion->prepare('CALL proximas_consultas(?, 0, 100000);');
-                  $resultado->execute([$_SESSION["s_profesor"]]);
+                  $resultado->execute([$param_profesor]);
                   $pagina = isset($_GET['pagina']) ? $_GET['pagina'] : null;
                   if (!$pagina) {
                     $inicio = 0;
@@ -85,14 +87,15 @@
                   $total_registros = $resultado->rowCount();
                   $total_paginas = ceil($total_registros / $Cant_por_Pag);
                   $resultado = $conexion->prepare('CALL proximas_consultas(?, ?, ?);');
-                  $resultado->execute([$_SESSION["s_profesor"], $inicio, $Cant_por_Pag]);
+                  $resultado->execute([$param_profesor, $inicio, $Cant_por_Pag]);
                   $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
                   if ($resultado->rowCount() > 0) {
                     foreach ($data as $fila) {
                       echo '<tr>';
                         echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
-                        if (!isset($_SESSION["s_profesor"])) {
+                        // Mostrar columna profesor solo si es admin
+                        if ($param_profesor == -1) {
                           echo '<td>' . $fila["nombre_profesor"] . '</td>';
                         }
                         if ($fila["fecha_gen"] == null) {
@@ -153,7 +156,7 @@
                   <tr>
                     <th scope="col">Materia</th>
                     <?php
-                    if (!isset($_SESSION["s_profesor"])) {
+                    if ($param_profesor == -1) {
                       echo '<th scope="col">Profesor</th>';
                     }
                     ?>
@@ -166,7 +169,7 @@
                   <?php
                   $Cant_por_Pag = 3;
                   $resultado = $conexion->prepare('CALL consultas_canceladas(?, 0, 100000);');
-                  $resultado->execute([$_SESSION["s_profesor"]]);
+                  $resultado->execute([$param_profesor]);
                   $pagina_canc = isset($_GET['pagina_canc']) ? $_GET['pagina_canc'] : null;
                   if (!$pagina_canc) {
                     $inicio = 0;
@@ -177,14 +180,14 @@
                   $total_registros = $resultado->rowCount();
                   $total_paginas_canc = ceil($total_registros / $Cant_por_Pag);
                   $resultado = $conexion->prepare('CALL consultas_canceladas(?, ?, ?);');
-                  $resultado->execute([$_SESSION["s_profesor"], $inicio, $Cant_por_Pag]);
+                  $resultado->execute([$param_profesor, $inicio, $Cant_por_Pag]);
                   $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
                   if ($resultado->rowCount() > 0) {
                     foreach ($data as $fila) {
                       echo '<tr>';
                       echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
-                      if (!isset($_SESSION["s_profesor"])) {
+                      if ($param_profesor == -1) {
                         echo '<td>' . $fila["nombre_profesor"] . '</td>';
                       }
 

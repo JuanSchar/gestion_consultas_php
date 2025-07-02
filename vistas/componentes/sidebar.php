@@ -89,6 +89,16 @@
               echo '<span class="nav-link-text">Carga de horas</span>';
               echo '</a>';
               echo '</li>';
+
+              echo '<li class="nav-item">';
+              echo '<a class="nav-link ';
+              if (strpos($page, 'materias')) {
+                echo 'active';
+              }
+              echo '" href="../vistas/materias.php">';
+              echo '<span class="nav-link-text">Administrar Materias</span>';
+              echo '</a>';
+              echo '</li>';
             }
             ?>
             <?php

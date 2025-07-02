@@ -24,19 +24,17 @@
         <div class="col">
           <div class="card">
             <div class="card-header border-0">
-              <h3>Listado de consultas pendientes de aprobación</h3>
+              <h3>Carga de horas de profesores</h3>
             </div>
 
-            <div class="card-body">
-              <div class="pl-lg-4">
-                <div class="row">
-                  <div class="col-lg-12">
-                    <form action="?" method="post" enctype="multipart/form-data">
-                      <label>Seleccione el archivo a subir</label>
-                      <p><input class="form-control" placeholder="Seleccione el archivo a subir" type="file" name="file" /> </p>
-                      <p><input type="submit" name="upload" class="btn btn-primary btn-block" onclick="swal()" value="ACTUALIZAR HORAS DE CONSULTA" /> </p>
-                    </form>
-                  </div>
+            <div class="card-body pt-1">
+              <div class="row">
+                <div class="col-lg-12">
+                  <form action="?" method="post" enctype="multipart/form-data">
+                    <label>Seleccione el archivo a subir</label>
+                    <p><input class="form-control" placeholder="Seleccione el archivo a subir" type="file" name="file" required /> </p>
+                    <p><input type="submit" name="upload" class="btn btn-outline-primary" onclick="swal()" value="Actualizar horas de consulta" /> </p>
+                  </form>
                 </div>
               </div>
             </div>

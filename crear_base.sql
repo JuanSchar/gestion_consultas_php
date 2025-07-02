@@ -25,28 +25,34 @@ DELIMITER $$
 --
 -- Procedimientos
 --
-CREATE DEFINER=`root`@`localhost` PROCEDURE `consultas_a_cancelar` (IN `p_idprofesor` INT, IN `p_fecha_desde` DATE, IN `p_fecha_hasta` DATE)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `consultas_a_cancelar` (IN `p_idprofesor` INT, IN `p_fecha_desde` DATE, IN `p_fecha_hasta` DATE)
+BEGIN
+    -- Tabla de fechas para el rango seleccionado
+    WITH RECURSIVE fechas AS (
+        SELECT p_fecha_desde AS fecha
+        UNION ALL
+        SELECT DATE_ADD(fecha, INTERVAL 1 DAY) FROM fechas WHERE fecha < p_fecha_hasta
+    )
     SELECT 
         ch.idconsultas_horario,
         m.nombre_materia,
-        ch.fecha_consulta AS fecha,
+        IFNULL(ch.fecha_consulta, f.fecha) AS fecha,
         ch.hora_ini,
         ch.dia
     FROM 
-        consultas_horario ch
+        fechas f
+        JOIN consultas_horario ch ON (
+            (ch.fecha_consulta = f.fecha) OR
+            (ch.fecha_consulta IS NULL AND ch.id_dia = WEEKDAY(f.fecha))
+        )
         INNER JOIN materia m ON ch.idmateria = m.idmateria
     WHERE 
         ch.idprofesor = p_idprofesor
         AND ch.estado = 'Aceptada'
-        AND (
-            (ch.fecha_consulta BETWEEN p_fecha_desde AND p_fecha_hasta)
-            OR
-            (ch.fecha_consulta IS NULL AND ch.dia = DAYNAME(p_fecha_desde))
-        )
         AND NOT EXISTS (
             SELECT 1 FROM consultas_horarios_bloqueos chb
             WHERE chb.idconsultas_horario = ch.idconsultas_horario
-            AND chb.fecha_bloqueo = p_fecha_desde
+            AND chb.fecha_bloqueo = f.fecha
         );
 END$$
 
@@ -65,7 +71,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `consultas_canceladas` (IN `p_idprof
         INNER JOIN materia m ON ch.idmateria = m.idmateria
         INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
     WHERE 
-        ch.idprofesor = p_idprofesor
+        (p_idprofesor = -1 OR ch.idprofesor = p_idprofesor)
         AND c.estado = 'Rechazado'
         AND c.fecha >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
     
@@ -85,7 +91,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `consultas_canceladas` (IN `p_idprof
         INNER JOIN materia m ON ch.idmateria = m.idmateria
         INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
     WHERE 
-        ch.idprofesor = p_idprofesor
+        (p_idprofesor = -1 OR ch.idprofesor = p_idprofesor)
         AND chb.fecha_bloqueo >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
     
     ORDER BY 
@@ -93,27 +99,59 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `consultas_canceladas` (IN `p_idprof
     LIMIT p_offset, p_limit;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `filtro_consultas` (IN `p_idmateria` INT, IN `p_idprofesor` INT)   BEGIN
-    SELECT 
-        ch.idconsultas_horario,
-        m.nombre_materia,
-        p.nombre_profesor,
-        ch.fecha_consulta AS fecha,
-        ch.dia,
-        ch.hora_ini,
-        ch.hora_fin
-    FROM 
-        consultas_horario ch
-        INNER JOIN materia m ON ch.idmateria = m.idmateria
-        INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
-    WHERE 
-        (p_idmateria = -1 OR ch.idmateria = p_idmateria) AND
-        (p_idprofesor = -1 OR ch.idprofesor = p_idprofesor) AND
-        ch.estado = 'Aceptada' AND
-        (ch.fecha_consulta >= CURDATE() OR ch.fecha_consulta IS NULL);
+CREATE DEFINER=`root`@`localhost` PROCEDURE `filtro_consultas` (IN `p_idmateria` INT, IN `p_idprofesor` INT)
+BEGIN
+  DECLARE semana_inicio DATE;
+  DECLARE semana_fin DATE;
+  SET semana_inicio = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE())) DAY);
+  SET semana_fin = DATE_ADD(semana_inicio, INTERVAL 6 DAY);
+
+  SELECT 
+    ch.idconsultas_horario,
+    m.nombre_materia,
+    p.nombre_profesor,
+    ch.fecha_consulta AS fecha,
+    ch.dia,
+    ch.hora_ini,
+    ch.hora_fin
+  FROM 
+    consultas_horario ch
+    INNER JOIN materia m ON ch.idmateria = m.idmateria
+    INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
+  WHERE 
+    (p_idmateria = -1 OR ch.idmateria = p_idmateria) AND
+    (p_idprofesor = -1 OR ch.idprofesor = p_idprofesor) AND
+    ch.estado = 'Aceptada' AND
+    (
+      -- Horarios con fecha específica a partir de hoy, que no estén bloqueados
+      (ch.fecha_consulta >= CURDATE() 
+        AND NOT EXISTS (
+          SELECT 1 FROM consultas_horarios_bloqueos chb
+          WHERE chb.idconsultas_horario = ch.idconsultas_horario
+          AND chb.fecha_bloqueo = ch.fecha_consulta
+        )
+      )
+      OR
+      -- Horarios recurrentes (sin fecha), que no estén bloqueados ni ocupados esa semana
+      (ch.fecha_consulta IS NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM consultas_horarios_bloqueos chb
+          WHERE chb.idconsultas_horario = ch.idconsultas_horario
+          AND chb.fecha_bloqueo BETWEEN semana_inicio AND semana_fin
+          AND chb.fecha_bloqueo >= CURDATE()
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM consultas c
+          WHERE c.idconsultas_horario = ch.idconsultas_horario
+          AND c.fecha BETWEEN semana_inicio AND semana_fin
+          AND c.estado IN ('Pendiente','Confirmado','Aceptado')
+        )
+      )
+    );
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `proximas_consultas` (IN `p_idprofesor` INT, IN `p_offset` INT, IN `p_limit` INT)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `proximas_consultas` (IN `p_idprofesor` INT, IN `p_offset` INT, IN `p_limit` INT)
+BEGIN
     SELECT 
         m.nombre_materia,
         p.nombre_profesor,
@@ -127,11 +165,11 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `proximas_consultas` (IN `p_idprofes
         INNER JOIN materia m ON ch.idmateria = m.idmateria
         INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
         LEFT JOIN consultas c ON ch.idconsultas_horario = c.idconsultas_horario 
-            AND c.estado IN ('Confirmado', 'Aceptado')  -- Ampliar estados válidos
+            AND c.estado IN ('Confirmado', 'Aceptado')
     WHERE 
-        ch.idprofesor = p_idprofesor
-        AND ch.estado IN ('Activo', 'Aceptada')  -- Ampliar estados válidos
-        AND (ch.fecha_consulta >= CURDATE() || ch.fecha_consulta is null)  -- Solo futuras
+        (p_idprofesor = -1 OR ch.idprofesor = p_idprofesor)
+        AND ch.estado IN ('Activo', 'Aceptada')
+        AND (ch.fecha_consulta >= CURDATE() OR ch.fecha_consulta IS NULL)
         AND (c.fecha >= CURDATE())
     GROUP BY 
         ch.idconsultas_horario
