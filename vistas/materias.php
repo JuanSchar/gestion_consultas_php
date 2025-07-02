@@ -54,7 +54,7 @@ if ($accion == 'eliminar' && isset($_GET['id'])) {
                 echo '<div class="card-header border-0">';
                   echo '<h3 class="mb-0">Nueva Materia</h3>';
                 echo '</div>';
-                echo '<div class="card-body">';
+                echo '<div class="card-body pt-1">';
                   echo '<form method="POST" action="materias.php?accion=nueva">';
                     echo '<div class="pl-lg-12">';
                       echo '<div class="row">';
@@ -91,7 +91,7 @@ if ($accion == 'eliminar' && isset($_GET['id'])) {
       <div class="row">
         <div class="col">
           <div class="card">
-            <div class="card-header border-0 d-md-flex justify-content-between ">
+            <div class="card-header border-0 d-md-flex justify-content-between">
               <h3 class="mb-0">Listado de materias</h3>
               <div class="mt-2 mt-sm-0">
                 <a href="materias.php?accion=nueva" class="btn btn-outline-primary btn-sm">Nueva Materia</a>

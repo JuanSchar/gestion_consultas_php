@@ -14,59 +14,72 @@
   <?php include("../bd/conexion.php") ?>
   <div class="main-content" id="panel">
     <?php include("componentes/navbar.php") ?>
-    <div class="container pt-4">
-      <h2>Asignar Profesores a Materias</h2>
-      <?php
-        // Obtener materias y profesores
-        $objeto = new Conexion();
-        $conexion = $objeto->Conectar();
-        $materias = $conexion->query("SELECT * FROM materia")->fetchAll(PDO::FETCH_ASSOC);
-        $profesores = $conexion->query("SELECT * FROM profesor")->fetchAll(PDO::FETCH_ASSOC);
-        // Determinar materia seleccionada
-        $id_materia_seleccionada = isset($_GET['id_materia']) ? $_GET['id_materia'] : (isset($materias[0]['idmateria']) ? $materias[0]['idmateria'] : null);
-        // Procesar asignación solo si es POST
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['asignar'])) {
-            $id_materia = $_POST['id_materia'];
-            $ids_profesores = $_POST['ids_profesores'];
-            $conexion->prepare("DELETE FROM materias_profesores WHERE idmateria = ?")->execute([$id_materia]);
-            foreach ($ids_profesores as $id_profesor) {
-                $conexion->prepare("INSERT INTO materias_profesores (idmateria, idprofesor) VALUES (?, ?)")->execute([$id_materia, $id_profesor]);
-            }
-            echo '<div class="alert alert-success">Profesores asignados correctamente.</div>';
-            $id_materia_seleccionada = $id_materia;
-        }
-        // Obtener profesores ya asignados a la materia seleccionada
-        $profesores_asignados = [];
-        if ($id_materia_seleccionada) {
-            $stmt = $conexion->prepare("SELECT idprofesor FROM materias_profesores WHERE idmateria = ?");
-            $stmt->execute([$id_materia_seleccionada]);
-            $profesores_asignados = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        }
-      ?>
-      <form method="GET" class="mb-3">
-        <div class="form-group">
-          <label>Materia</label>
-          <select name="id_materia" class="form-control" onchange="this.form.submit()">
-            <?php foreach ($materias as $m) {
-              $selected = ($m['idmateria'] == $id_materia_seleccionada) ? 'selected' : '';
-              echo '<option value="' . $m['idmateria'] . '" ' . $selected . '>' . $m['nombre_materia'] . '</option>';
-            } ?>
-          </select>
+    <?php $title = "Asignar profesores"; include("componentes/header.php") ?>
+    <div class="container-fluid pt-4">
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="card-header border-0">
+              <h3 class="mb-0">Asignar Profesores a Materias</h3>
+            </div>
+
+            <div class="card-body pt-1">
+              <?php
+                // Obtener materias y profesores
+                $objeto = new Conexion();
+                $conexion = $objeto->Conectar();
+                $materias = $conexion->query("SELECT * FROM materia")->fetchAll(PDO::FETCH_ASSOC);
+                $profesores = $conexion->query("SELECT * FROM profesor")->fetchAll(PDO::FETCH_ASSOC);
+                // Determinar materia seleccionada
+                $id_materia_seleccionada = isset($_GET['id_materia']) ? $_GET['id_materia'] : (isset($materias[0]['idmateria']) ? $materias[0]['idmateria'] : null);
+                // Procesar asignación solo si es POST
+                if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['asignar'])) {
+                  $id_materia = $_POST['id_materia'];
+                  $ids_profesores = $_POST['ids_profesores'];
+                  $conexion->prepare("DELETE FROM materias_profesores WHERE idmateria = ?")->execute([$id_materia]);
+                  foreach ($ids_profesores as $id_profesor) {
+                    $conexion->prepare("INSERT INTO materias_profesores (idmateria, idprofesor) VALUES (?, ?)")->execute([$id_materia, $id_profesor]);
+                  }
+                  echo '<div class="alert alert-success">Profesores asignados correctamente.</div>';
+                  $id_materia_seleccionada = $id_materia;
+                }
+                // Obtener profesores ya asignados a la materia seleccionada
+                $profesores_asignados = [];
+                if ($id_materia_seleccionada) {
+                  $stmt = $conexion->prepare("SELECT idprofesor FROM materias_profesores WHERE idmateria = ?");
+                  $stmt->execute([$id_materia_seleccionada]);
+                  $profesores_asignados = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                }
+              ?>
+              <form method="GET" class="mb-3">
+                <div class="form-group">
+                  <label>Materia</label>
+                  <select name="id_materia" class="form-control" onchange="this.form.submit()">
+                    <?php foreach ($materias as $m) {
+                      $selected = ($m['idmateria'] == $id_materia_seleccionada) ? 'selected' : '';
+                      echo '<option value="' . $m['idmateria'] . '" ' . $selected . '>' . $m['nombre_materia'] . '</option>';
+                    } ?>
+                  </select>
+                </div>
+              </form>
+              <form method="POST">
+                <input type="hidden" name="id_materia" value="<?php echo htmlspecialchars($id_materia_seleccionada); ?>">
+                <div class="form-group">
+                  <label>Profesores</label>
+                  <select id="select-profesores" name="ids_profesores[]" class="form-control" multiple required>
+                    <?php foreach ($profesores as $p) {
+                      $selected = in_array($p['idprofesor'], $profesores_asignados) ? 'selected' : '';
+                      echo '<option value="' . $p['idprofesor'] . '" ' . $selected . '>' . $p['nombre_profesor'] . '</option>';
+                    } ?>
+                  </select>
+                </div>
+                <button type="submit" name="asignar" class="btn btn-outline-primary">Asignar</button>
+                <a href="materias.php" class="btn btn-outline-secondary">Volver</a>
+              </form>
+            </div>
+          </div>
         </div>
-      </form>
-      <form method="POST">
-        <input type="hidden" name="id_materia" value="<?php echo htmlspecialchars($id_materia_seleccionada); ?>">
-        <div class="form-group">
-          <label>Profesores</label>
-          <select id="select-profesores" name="ids_profesores[]" class="form-control" multiple required>
-            <?php foreach ($profesores as $p) {
-              $selected = in_array($p['idprofesor'], $profesores_asignados) ? 'selected' : '';
-              echo '<option value="' . $p['idprofesor'] . '" ' . $selected . '>' . $p['nombre_profesor'] . '</option>';
-            } ?>
-          </select>
-        </div>
-        <button type="submit" name="asignar" class="btn btn-success">Asignar</button>
-      </form>
+      </div>
     </div>
   </div>
   <script src="../assets/vendor/jquery/dist/jquery.min.js"></script>

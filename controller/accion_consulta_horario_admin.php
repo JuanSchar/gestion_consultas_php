@@ -88,7 +88,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           <div class="col-lg-6">
                             <div class="form-group">
                               <label>Día</label>
-                              <input type="text" name="dia" class="form-control" value="<?php echo htmlspecialchars($fila['dia']); ?>" required>
+                              <select name="dia" id="dia-select" class="form-control" required onchange="actualizarIdDia()">
+                                <?php
+                                $dias_semana = [
+                                  0 => 'lunes',
+                                  1 => 'martes',
+                                  2 => 'miércoles',
+                                  3 => 'jueves',
+                                  4 => 'viernes',
+                                  5 => 'sábado',
+                                  6 => 'domingo'
+                                ];
+                                $dia_actual = $fila['dia'];
+                                $id_dia_actual = array_search($dia_actual, $dias_semana);
+                                foreach ($dias_semana as $id => $nombre) {
+                                  $sel = $nombre == $dia_actual ? 'selected' : '';
+                                  echo "<option value='$nombre' data-id='$id' $sel>$nombre</option>";
+                                }
+                                ?>
+                              </select>
+                              <input type="hidden" name="id_dia" id="id-dia" value="<?php echo $id_dia_actual ? $id_dia_actual : '' ?>">
                             </div>
                           </div>
                           <div class="col-lg-3">
@@ -142,6 +161,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <script src="../assets/vendor/js-cookie/js.cookie.js"></script>
         <script src="../assets/js/argon.js?v=1.2.0"></script>
         <script src="../plugins/sweetalert2/sweetalert2.all.min.js"></script>
+        <script>
+        function actualizarIdDia() {
+          var select = document.getElementById('dia-select');
+          var selectedOption = select.options[select.selectedIndex];
+          var idDia = selectedOption.getAttribute('data-id');
+          document.getElementById('id-dia').value = idDia;
+        }
+        // Al cargar la página, asegurarse de que el id-dia esté correcto
+        window.onload = function() {
+          actualizarIdDia();
+        };
+        </script>
       </body>
       </html>
       <?php
@@ -153,12 +184,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $idmateria = $_POST['idmateria'];
     $idprofesor = $_POST['idprofesor'];
     $dia = $_POST['dia'];
+    $id_dia = isset($_POST['id_dia']) ? $_POST['id_dia'] : null;
     $hora_ini = $_POST['hora_ini'];
     $hora_fin = $_POST['hora_fin'];
     $fecha_consulta = $_POST['fecha_consulta'] ? $_POST['fecha_consulta'] : null;
     $estado = $_POST['estado'];
-    $stmt = $conexion->prepare('UPDATE consultas_horario SET idmateria=?, idprofesor=?, dia=?, hora_ini=?, hora_fin=?, fecha_consulta=?, estado=? WHERE idconsultas_horario=?');
-    if ($stmt->execute([$idmateria, $idprofesor, $dia, $hora_ini, $hora_fin, $fecha_consulta, $estado, $id])) {
+    $stmt = $conexion->prepare('UPDATE consultas_horario SET idmateria=?, idprofesor=?, dia=?, id_dia=?, hora_ini=?, hora_fin=?, fecha_consulta=?, estado=? WHERE idconsultas_horario=?');
+    if ($stmt->execute([$idmateria, $idprofesor, $dia, $id_dia, $hora_ini, $hora_fin, $fecha_consulta, $estado, $id])) {
       header('Location: ../vistas/listado_consultas_admin.php?msg=editado');
     } else {
       header('Location: ../vistas/listado_consultas_admin.php?msg=error');

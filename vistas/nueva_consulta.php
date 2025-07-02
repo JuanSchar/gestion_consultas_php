@@ -103,10 +103,10 @@
                   </div>
                 </div>
               </form>
-              <div id="error"></div>
+              <div class="alert alert-danger" id="error"></div>
               <?php
               if (isset($_GET['retorno']) && $_GET['retorno'] == 1) {
-                echo '<div class="correcto">Solicitud enviada al administrador.</div>';
+                echo '<div class="alert alert-success">Solicitud enviada al administrador.</div>';
               }
               ?>
             </div>

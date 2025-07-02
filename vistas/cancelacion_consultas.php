@@ -65,7 +65,7 @@
 
               <?php
               if (isset($_GET['retorno']) && $_GET['retorno'] == 1) {
-                echo '<div class="correcto">Consultas canceladas correctamente.</div>';
+                echo '<div class="alert alert-success">Consultas canceladas correctamente.</div>';
               }
               if (isset($_GET['buscar2'])) {
                 $idprofesor = $_SESSION["s_profesor"];
@@ -75,36 +75,37 @@
                 $resultado = $conexion->prepare('CALL consultas_a_cancelar(?, ?, ?)');
                 $resultado->execute([$idprofesor, $fecha_desde, $fecha_hasta]);
                 $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
+                echo '<div class="pl-lg-4">';
+                  echo '<div class="row">';
+                    echo '<div class="col-lg-12">';
+                      echo '<div class="form-group">';
+                        if ($resultado->rowCount() > 0) {
+                          echo '<label class="form-control-label" for="input-last-name">Horas de consulta a cancelar</label>';
+                          echo '<form class="form" action="../controller/cancelar_consultas.php" method="POST">';
+                            foreach ($data as $fila) {
+                              $date = strtotime($fila["fecha"]);
+                              $new_date = date('d-m-Y', $date);
+                              echo '<div class="form-check">';
+                                echo '<input name="idconsultas_horario[]" class="form-check-input" type="checkbox" value="' . $fila["idconsultas_horario"] . '/' . $fila["fecha"] . '" id="' . $fila["idconsultas_horario"] . '">';
+                                echo '<label class="form-check-label" for="' . $fila["idconsultas_horario"] . '">' . $new_date . ' - ' . $fila["hora_ini"] . ' ' . $fila["nombre_materia"] . '</label>';
+                              echo '</div>';
+                            }
 
-                echo '<div class="row">';
-                echo '<div class="col-lg-12">';
-                echo '<div class="form-group">';
-                if ($resultado->rowCount() > 0) {
-                  echo '<label class="form-control-label" for="input-last-name">Horas de consulta a cancelar</label>';
-                  echo ' <form class="form" action="../controller/cancelar_consultas.php" method="POST">';
-                  foreach ($data as $fila) {
-                    $date = strtotime($fila["fecha"]);
-                    $new_date = date('d-m-Y', $date);
-                    echo ' <div class="form-check">';
-                    echo '<input name="idconsultas_horario[]" class="form-check-input" type="checkbox" value="' . $fila["idconsultas_horario"] . '/' . $fila["fecha"] . '" id="' . $fila["idconsultas_horario"] . '">';
-                    echo '<label class="form-check-label" for="' . $fila["idconsultas_horario"] . '">' . $new_date . ' - ' . $fila["hora_ini"] . ' ' . $fila["nombre_materia"] . '</label>';
+                            echo '<div class="form-group">';
+                              echo '<label class="form-control-label">Motivo de la cancelación</label>';
+                              echo '<textarea name="motivo" rows="4" class="form-control" required></textarea>';
+                            echo '</div>';
+
+                            echo '<div class="form-group">';
+                              echo '<button type="submit" class="btn btn-outline-primary">Cancelar consulta</button>';
+                            echo '</div>';
+                          echo '</form>';
+                        } else {
+                          echo '<div class="alert alert-danger">No hay consultas programadas en ese rango de fechas.</div>';
+                        }
+                      echo '</div>';
                     echo '</div>';
-                  }
-                  echo '<div class="pl-lg-4">';
-                  echo '<div class="form-group">';
-                  echo '<label class="form-control-label">Motivo de la cancelación</label>';
-                  echo '<textarea name="motivo" rows="4" class="form-control" required></textarea>';
                   echo '</div>';
-                  echo ' </div>';
-                  echo '<div class="pl-lg-12">';
-                  echo '<p><input type="submit" class="btn btn-primary btn-block" value="CANCELAR CONSULTA" /> </p>';
-                  echo '</div>';
-                  echo '</form>';
-                } else {
-                  echo '<div>No hay consultas programadas en ese rango de fechas.</div>';
-                }
-                echo '</div>';
-                echo '</div>';
                 echo '</div>';
               }
               ?>
