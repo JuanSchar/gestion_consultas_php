@@ -199,9 +199,9 @@ CREATE TABLE `alumno` (
 --
 
 INSERT INTO `alumno` (`idalumno`, `nombre`, `apellido`, `legajo`, `correo`) VALUES
-(1, 'JUAN FDSFSDD', 'schar', '41798', 'alumno1@gmail.com'),
-(2, 'JUAN TEST', '', '41796', 'test1@gmail.com'),
-(3, 'JOSE ASDFD', '', '41795', 'alumno1@gmail.com');
+(1, 'JUAN', 'schar', '41798', 'alumno1@gmail.com'),
+(2, 'Test', 'TestA', '41796', 'test1@gmail.com'),
+(3, 'JOSE', 'Alpe', '41795', 'alumno1@gmail.com');
 
 -- --------------------------------------------------------
 
@@ -343,17 +343,19 @@ CREATE TABLE `usuarios` (
   `idusuario` int(11) NOT NULL,
   `usuario` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `idprofesor` int(11) DEFAULT NULL
+  `idprofesor` int(11) DEFAULT NULL,
+  `idalumno` int(11) DEFAULT NULL,
+  `rol` int(11) NOT NULL DEFAULT 3 COMMENT '1=admin, 2=profesor, 3=alumno'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`idusuario`, `usuario`, `password`, `idprofesor`) VALUES
-(1, 'admin', '7a42f3f6148e2404542e1b4eade9a918', NULL),
-(2, 'Test Prof', '7a42f3f6148e2404542e1b4eade9a918', 1);
-(3, 'Profesor 2', '7a42f3f6148e2404542e1b4eade9a918', 2);
+INSERT INTO `usuarios` (`idusuario`, `usuario`, `password`, `idprofesor`, `idalumno`, `rol`) VALUES
+(1, 'admin', '7a42f3f6148e2404542e1b4eade9a918', NULL, NULL, 1),
+(2, 'Test Prof', '7a42f3f6148e2404542e1b4eade9a918', 1, NULL, 2),
+(3, 'Profesor 2', '7a42f3f6148e2404542e1b4eade9a918', 2, NULL, 2);
 
 INSERT INTO `materias_profesores` (`id`, `idmateria`, `idprofesor`) VALUES 
 (1, 1, 1), (2, 3, 1), (5, 2, 1), (3, 2, 2), (4, 3, 2);

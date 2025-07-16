@@ -99,6 +99,16 @@
               echo '<span class="nav-link-text">Administrar Materias</span>';
               echo '</a>';
               echo '</li>';
+
+              echo '<li class="nav-item">';
+              echo '<a class="nav-link ';
+              if (strpos($page, 'usuarios')) {
+                echo 'active';
+              }
+              echo '" href="../vistas/usuarios.php">';
+              echo '<span class="nav-link-text">Administrar Usuarios</span>';
+              echo '</a>';
+              echo '</li>';
             }
             ?>
             <?php
