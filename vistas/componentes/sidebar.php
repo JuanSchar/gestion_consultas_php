@@ -23,18 +23,17 @@
             $page = $_SERVER['REQUEST_URI'];
 
             echo '<li class="nav-item">';
-            echo ' <a class="nav-link ';
-            if (strpos($page, 'dashboard')) {
-              echo 'active';
-            }
+              echo ' <a class="nav-link ';
+                if (strpos($page, 'dashboard')) {
+                  echo 'active';
+                }
 
-            echo '" href="../vistas/dashboard.php">
+                echo '" href="../vistas/dashboard.php">
                 <span class="nav-link-text">Menú principal</span>
               </a>
             </li>';
 
-
-            if (isset($_SESSION["s_profesor"])) {
+            if ($_SESSION["rol"] == 2) {
               echo '<li class="nav-item ">';
               echo '<a class="nav-link ';
               if (strpos($page, 'listado_consultas')) {
@@ -68,7 +67,7 @@
               echo '</a>';
               echo '</li>';
             }
-            if (!isset($_SESSION["s_profesor"])) {
+            if ($_SESSION["rol"] == 1) {
               echo '<li class="nav-item">';
               echo '<a class="nav-link ';
               if (strpos($page, 'listado_consultas_admin')) {
