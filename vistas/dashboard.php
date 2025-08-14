@@ -16,8 +16,11 @@
   <?php include("../bd/conexion.php");
   $objeto = new Conexion();
   $conexion = $objeto->Conectar();
-  // Determinar el parámetro de profesor (-1 para admin, id para profesor)
-  $param_profesor = isset($_SESSION["s_profesor"]) ? $_SESSION["s_profesor"] : -1; ?>
+  // Determinar el rol y parámetro de usuario
+  $rol_usuario = isset($_SESSION["rol"]) ? $_SESSION["rol"] : 1; // 1=admin, 2=profesor, 3=alumno
+  $param_profesor = isset($_SESSION["s_profesor"]) ? $_SESSION["s_profesor"] : -1;
+  $param_alumno = isset($_SESSION["s_idalumno"]) ? $_SESSION["s_idalumno"] : null;
+?>
 
   <div class="main-content" id="panel">
     <?php include("componentes/navbar.php") ?>
@@ -37,8 +40,11 @@
           include("componentes/dashboard_cards.php") ?>
 
           <?php
-          $cardnum = "4";
-          include("componentes/dashboard_cards.php") ?>
+          if ($rol_usuario != 3) {
+            $cardnum = "4";
+            include("componentes/dashboard_cards.php");
+          }
+          ?>
         </div>
       </div>
     </div>
@@ -52,9 +58,13 @@
                 <div class="col">
                   <h3 class="mb-0">Próximas consultas</h3>
                 </div>
-                <div class="col text-right">
-                  <a href="listado_consultas.php" class="btn btn-sm btn-primary">Ver más</a>
-                </div>
+                <?php
+                if ($rol_usuario != 3) {
+                  echo '<div class="col text-right">
+                    <a href="listado_consultas.php" class="btn btn-sm btn-primary">Ver más</a>
+                  </div>';
+                }
+                ?>
               </div>
             </div>
             <div class="table-responsive pb-4">
@@ -69,33 +79,76 @@
                     ?>
                     <th scope="col">Fecha </th>
                     <th scope="col">Hora inicio - fin</th>
-                    <th scope="col">Cantidad de alumnos</th>
+                    <?php
+                    if ($rol_usuario != 3) {
+                      echo '<th scope="col">Cantidad de alumnos</th>';
+                    }
+                    ?>
                   </tr>
                 </thead>
                 <tbody>
                   <?php
                   $Cant_por_Pag = 5;
-                  $resultado = $conexion->prepare('CALL proximas_consultas(?, 0, 100000);');
-                  $resultado->execute([$param_profesor]);
-                  $pagina = isset($_GET['pagina']) ? $_GET['pagina'] : null;
-                  if (!$pagina) {
-                    $inicio = 0;
-                    $pagina = 1;
-                  } else {
+                  if ($rol_usuario == 3) {
+                    // Alumno: solo consultas en las que está inscripto, no canceladas y no bloqueadas
+                    $sql_total = "SELECT COUNT(*) as total
+                        FROM consultas c
+                        JOIN consultas_horario ch ON c.idconsultas_horario = ch.idconsultas_horario
+                        WHERE c.idalumno = ?
+                          AND c.fecha >= CURRENT_DATE()
+                          AND c.estado != 'Rechazado'
+                          AND NOT EXISTS (
+                            SELECT 1 FROM consultas_horarios_bloqueos chb
+                            WHERE chb.idconsultas_horario = ch.idconsultas_horario
+                              AND chb.fecha_bloqueo = c.fecha
+                          )";
+                    $res_total = $conexion->prepare($sql_total);
+                    $res_total->execute([$param_alumno]);
+                    $total_registros = $res_total->fetchColumn();
+                    $pagina = isset($_GET['pagina']) ? $_GET['pagina'] : 1;
                     $inicio = ($pagina - 1) * $Cant_por_Pag;
+                    $total_paginas = ceil($total_registros / $Cant_por_Pag);
+                    $sql = "SELECT c.*, m.nombre_materia, p.nombre_profesor, ch.hora_ini, ch.hora_fin, ch.dia, ch.fecha_consulta as fecha_gen
+                        FROM consultas c
+                        JOIN consultas_horario ch ON c.idconsultas_horario = ch.idconsultas_horario
+                        JOIN materia m ON ch.idmateria = m.idmateria
+                        LEFT JOIN profesor p ON ch.idprofesor = p.idprofesor
+                        WHERE c.idalumno = ?
+                          AND c.fecha >= CURRENT_DATE()
+                          AND c.estado != 'Rechazado'
+                          AND NOT EXISTS (
+                            SELECT 1 FROM consultas_horarios_bloqueos chb
+                            WHERE chb.idconsultas_horario = ch.idconsultas_horario
+                              AND chb.fecha_bloqueo = c.fecha
+                          )
+                        ORDER BY c.fecha ASC
+                        LIMIT $inicio, $Cant_por_Pag";
+                    $resultado = $conexion->prepare($sql);
+                    $resultado->execute([$param_alumno]);
+                    $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
+                  } else {
+                    $resultado = $conexion->prepare('CALL proximas_consultas(?, 0, 100000);');
+                    $resultado->execute([$param_profesor]);
+                    $pagina = isset($_GET['pagina']) ? $_GET['pagina'] : null;
+                    if (!$pagina) {
+                      $inicio = 0;
+                      $pagina = 1;
+                    } else {
+                      $inicio = ($pagina - 1) * $Cant_por_Pag;
+                    }
+                    $total_registros = $resultado->rowCount();
+                    $total_paginas = ceil($total_registros / $Cant_por_Pag);
+                    $resultado = $conexion->prepare('CALL proximas_consultas(?, ?, ?);');
+                    $resultado->execute([$param_profesor, $inicio, $Cant_por_Pag]);
+                    $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
                   }
-                  $total_registros = $resultado->rowCount();
-                  $total_paginas = ceil($total_registros / $Cant_por_Pag);
-                  $resultado = $conexion->prepare('CALL proximas_consultas(?, ?, ?);');
-                  $resultado->execute([$param_profesor, $inicio, $Cant_por_Pag]);
-                  $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
                   if ($resultado->rowCount() > 0) {
                     foreach ($data as $fila) {
                       echo '<tr>';
                         echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
-                        // Mostrar columna profesor solo si es admin
-                        if ($param_profesor == -1) {
+                        // Mostrar columna profesor solo si es admin o alumno (si existe la columna)
+                        if ($rol_usuario == 1 || ($rol_usuario == 3 && isset($fila["nombre_profesor"]))) {
                           echo '<td>' . $fila["nombre_profesor"] . '</td>';
                         }
                         if ($fila["fecha_gen"] == null) {
@@ -106,7 +159,9 @@
                         }
                         echo '<td>' .   $new_date . '</td>';
                         echo '<td>' . $fila["hora_ini"] . ' - ' . $fila["hora_fin"] . '</td>';
-                        echo '<td>' . $fila["cantidad_alumnos"] . '</td>';
+                        if ($rol_usuario != 3) {
+                          echo '<td>' . (isset($fila["cantidad_alumnos"]) ? $fila["cantidad_alumnos"] : '-') . '</td>';
+                        }
                       echo '</tr>';
                     }
                   } else {
@@ -168,26 +223,66 @@
                 <tbody>
                   <?php
                   $Cant_por_Pag = 3;
-                  $resultado = $conexion->prepare('CALL consultas_canceladas(?, 0, 100000);');
-                  $resultado->execute([$param_profesor]);
-                  $pagina_canc = isset($_GET['pagina_canc']) ? $_GET['pagina_canc'] : null;
-                  if (!$pagina_canc) {
-                    $inicio = 0;
-                    $pagina_canc = 1;
-                  } else {
+                  if ($rol_usuario == 3) {
+                    // Alumno: consultas rechazadas y bloqueos programados que afectan al alumno
+                    // Unificar consultas y evitar duplicados
+                    $sql_union = "SELECT m.nombre_materia, p.nombre_profesor, c.fecha AS fecha_bloqueo, ch.hora_ini, ch.hora_fin, 'Rechazado' AS motivo
+                        FROM consultas c
+                        INNER JOIN consultas_horario ch ON c.idconsultas_horario = ch.idconsultas_horario
+                        INNER JOIN materia m ON ch.idmateria = m.idmateria
+                        INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
+                        WHERE c.idalumno = ? AND c.estado = 'Rechazado' AND c.fecha >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+                    UNION
+                        SELECT DISTINCT m.nombre_materia, p.nombre_profesor, chb.fecha_bloqueo, ch.hora_ini, ch.hora_fin, chb.motivo
+                        FROM consultas_horarios_bloqueos chb
+                        INNER JOIN consultas_horario ch ON chb.idconsultas_horario = ch.idconsultas_horario
+                        INNER JOIN materia m ON ch.idmateria = m.idmateria
+                        INNER JOIN profesor p ON ch.idprofesor = p.idprofesor
+                        WHERE chb.fecha_bloqueo >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+                        AND EXISTS (
+                            SELECT 1 FROM consultas c
+                            WHERE c.idconsultas_horario = ch.idconsultas_horario
+                            AND c.idalumno = ?
+                            AND c.fecha = chb.fecha_bloqueo
+                        )";
+
+                    // Conteo total
+                    $sql_count = "SELECT COUNT(*) AS total FROM (" . $sql_union . ") AS sub";
+                    $res_total = $conexion->prepare($sql_count);
+                    $res_total->execute([$param_alumno, $param_alumno]);
+                    $total_registros = $res_total->fetchColumn();
+                    $pagina_canc = isset($_GET['pagina_canc']) ? $_GET['pagina_canc'] : 1;
                     $inicio = ($pagina_canc - 1) * $Cant_por_Pag;
+                    $total_paginas_canc = ceil($total_registros / $Cant_por_Pag);
+
+                    // Listado paginado
+                    $sql_listado = $sql_union . " ORDER BY fecha_bloqueo DESC LIMIT $inicio, $Cant_por_Pag";
+                    $resultado = $conexion->prepare($sql_listado);
+                    $resultado->execute([$param_alumno, $param_alumno]);
+                    $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
+                  } else {
+                    $resultado = $conexion->prepare('CALL consultas_canceladas(?, 0, 100000);');
+                    $resultado->execute([$param_profesor]);
+                    $pagina_canc = isset($_GET['pagina_canc']) ? $_GET['pagina_canc'] : null;
+                    if (!$pagina_canc) {
+                      $inicio = 0;
+                      $pagina_canc = 1;
+                    } else {
+                      $inicio = ($pagina_canc - 1) * $Cant_por_Pag;
+                    }
+                    $total_registros = $resultado->rowCount();
+                    $total_paginas_canc = ceil($total_registros / $Cant_por_Pag);
+                    $resultado = $conexion->prepare('CALL consultas_canceladas(?, ?, ?);');
+                    $resultado->execute([$param_profesor, $inicio, $Cant_por_Pag]);
+                    $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
                   }
-                  $total_registros = $resultado->rowCount();
-                  $total_paginas_canc = ceil($total_registros / $Cant_por_Pag);
-                  $resultado = $conexion->prepare('CALL consultas_canceladas(?, ?, ?);');
-                  $resultado->execute([$param_profesor, $inicio, $Cant_por_Pag]);
-                  $data = $resultado->fetchAll(PDO::FETCH_ASSOC);
 
                   if ($resultado->rowCount() > 0) {
                     foreach ($data as $fila) {
                       echo '<tr>';
                       echo '<td><b>' . $fila["nombre_materia"] . '</b></td>';
-                      if ($param_profesor == -1) {
+                      // Mostrar columna profesor solo si es admin o alumno (si existe la columna)
+                      if ($rol_usuario == 1 || ($rol_usuario == 3 && isset($fila["nombre_profesor"]))) {
                         echo '<td>' . $fila["nombre_profesor"] . '</td>';
                       }
 
@@ -195,7 +290,7 @@
                       $new_date = date('d-m-Y', $date);
                       echo '<td>' .   $new_date . '</td>';
                       echo '<td>' . $fila["hora_ini"] . ' - ' . $fila["hora_fin"] . '</td>';
-                      echo '<td>' . $fila["motivo"] . '</td>';
+                      echo '<td>' . (isset($fila["motivo"]) ? $fila["motivo"] : '-') . '</td>';
                       echo '</tr>';
                     }
                   } else {

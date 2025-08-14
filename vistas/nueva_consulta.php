@@ -103,7 +103,7 @@
                   </div>
                 </div>
               </form>
-              <div class="alert alert-danger" id="error"></div>
+              <div class="alert alert-danger" id="error" style="display: none"></div>
               <?php
               if (isset($_GET['retorno']) && $_GET['retorno'] == 1) {
                 echo '<div class="alert alert-success">Solicitud enviada al administrador.</div>';
@@ -191,16 +191,19 @@
       // si el campo de correo electrónico es válido, dejamos que el formulario se envíe
       if ( document.getElementById("dia").value  == -1) {
         document.getElementById("error").innerHTML = '<b>Debe seleccionar un dia</b>';
+        document.getElementById("error").style.display = 'block'
         event.preventDefault();
       }
 
       if ( document.getElementById("fecha").value  == '' && !document.getElementById("se_repite").checked ) {
         document.getElementById("error").innerHTML = '<b>Debe seleccionar una fecha</b>';
+        document.getElementById("error").style.display = 'block'
         event.preventDefault();
       }
 
       if ( document.getElementById("hora_hasta").value < document.getElementById("hora_desde").value) { 
         document.getElementById("error").innerHTML = '<b>La hora hasta no puede ser menor a la hora desde</b>d';
+        document.getElementById("error").style.display = 'block'
         event.preventDefault();
       }
     });
