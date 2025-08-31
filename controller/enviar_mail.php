@@ -1,57 +1,33 @@
 <?php
-include_once '../bd/conexion.php';
-try {
-    $objeto = new Conexion();
-    $conexion = $objeto->Conectar();
 
-// Recepcion de datos enviados mediante POST dsd ajax 
-$fila = (isset($_POST['fila'])) ? $_POST['fila'] : '';
-$accion = (isset($_POST['accion'])) ? $_POST['accion'] : '';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+require __DIR__ . '/../vendor/autoload.php';
 
-$resultado = $conexion->prepare('
-    SELECT a.correo, a.nombre, ch.dia, ch.hora_ini, ch.hora_fin, m.nombre_materia, p.nombre_profesor, c.fecha
-    FROM consultas c 
-    INNER JOIN alumno a on a.idalumno = c.idalumno 
-    INNER JOIN consultas_horario ch on ch.idconsultas_horario=c.idconsultas_horario
-    INNER JOIN materia m on m.idmateria=ch.idmateria
-    INNER JOIN profesor p on p.idprofesor=ch.idprofesor
-    WHERE c.idconsultas = ?;
-');
-$retorno = $resultado->execute([$fila]);
-$data = $resultado->fetch(PDO::FETCH_OBJ);
-$verbo = $accion==1? "CONFIRMO": "RECHAZO";
-if ( $resultado->rowCount() == 1 ) {
-$destinatario = $data->correo;
-$asunto = "Estado de consulta";
-$date = strtotime($data->fecha);
+function enviarMail($destinatario, $asunto, $mensaje, $copia = null) {
+  $mail = new PHPMailer(true);
+  try {
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'juanschar@gmail.com'; // Cambia por tu correo
+    $mail->Password = 'rihe yuez tubj ulyo'; // Cambia por tu contraseña o app password
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = 587;
 
-$new_date = date('d-m-Y', $date);
+    $mail->setFrom('juanschar@gmail.com', 'UTN Consultas');
+    $mail->addAddress($destinatario);
+    if ($copia) {
+      $mail->addCC($copia);
+    }
+    $mail->isHTML(true);
+    $mail->Subject = $asunto;
+    $mail->Body    = $mensaje;
 
-$cuerpo = '
-<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8">
-  </head>
-  <body>
-      <h1 style="font-weight:400;font-size:55px;text-align:center">UTN Facultad Regional Rosario<br>
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcS2-ETqV0Ssqn4CHUvui3Gb0UnFp4KVxwDTgw&usqp=CAU" alt="Logo utn"></h1>
-      
-      <p style="font-size:25px;text-align:center">Hola <b>' . $data->nombre . '!</b>. Mediante este mail notificamos que se ' . $verbo .  ' tu solicitud de consulta para la materia ' . $data->nombre_materia . ' para el dia ' . $data->dia . ' ' . $new_date . ' entre las '. $data->hora_ini . ' y las '. $data->hora_fin . ' con '. $data->nombre_profesor . '.</p>
-      
-  </body>
-</html>
-';
-$headers = "MIME-Version: 1.0\r\n";
-$headers .= "Content-type:text/html; charset=iso-8859- 1\r\n";
-$headers .= "From: Contacto UTN <contacto@gestionconsultasutn.ddns.net>\r\n";
-mail($destinatario,$asunto,$cuerpo,$headers);
-print($cuerpo);
-}
-
-$conexion=null;
-
-} catch (PDOException $e) {
-    echo '{"error":{"text":'. $e->getMessage() .'}}';
- 
+    $mail->send();
+    return true;
+  } catch (Exception $e) {
+    error_log('Error al enviar el correo: ' . $mail->ErrorInfo);
+    return false;
+  }
 }
