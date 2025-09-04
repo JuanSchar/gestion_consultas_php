@@ -199,9 +199,8 @@ CREATE TABLE `alumno` (
 --
 
 INSERT INTO `alumno` (`idalumno`, `nombre`, `apellido`, `legajo`, `correo`) VALUES
-(1, 'JUAN', 'schar', '41798', 'alumno1@gmail.com'),
-(2, 'Test', 'TestA', '41796', 'test1@gmail.com'),
-(3, 'JOSE', 'Alpe', '41795', 'alumno1@gmail.com');
+(1, 'Juan', 'schar', '41798', 'juanschar@gmail.com'),
+(2, 'Test', 'TestA', '41796', 'pabloschar@gmail.com');
 
 -- --------------------------------------------------------
 
@@ -222,10 +221,9 @@ CREATE TABLE `consultas` (
 --
 
 INSERT INTO `consultas` (`idconsultas`, `idalumno`, `idconsultas_horario`, `fecha`, `estado`) VALUES
-(1, 2, 17, '2025-05-02', 'Confirmado'),
-(2, 3, 17, '2025-05-02', 'Rechazado'),
-(3, 1, 17, '2025-05-02', 'Confirmado'),
-(4, 1, 18, '2025-05-03', 'Pendiente');
+(1, 2, 16, '2025-09-17', 'Confirmado'),
+(3, 1, 17, '2025-09-18', 'Rechazado'),
+(4, 1, 18, '2025-09-19', 'Pendiente');
 
 -- --------------------------------------------------------
 
@@ -251,11 +249,11 @@ CREATE TABLE `consultas_horario` (
 --
 
 INSERT INTO `consultas_horario` (`idconsultas_horario`, `idmateria`, `idprofesor`, `dia`, `id_dia`, `hora_ini`, `hora_fin`, `fecha_consulta`, `estado`, `Fecha_carga`) VALUES
-(16, 1, 1, 'lunes', 0, '12:30:00', '23:15:00', '2025-04-30', 'Aceptada', '2025-04-29'),
-(17, 2, 1, 'martes', 1, '11:15:00', '23:30:00', '2025-05-02', 'Aceptada', '2025-04-29'),
-(18, 3, 1, 'miércoles', 2, '13:45:00', '23:30:00', '2025-05-03', 'Aceptada', '2025-04-29'),
-(19, 2, 2, 'jueves', 3, '19:00:00', '16:30:00', NULL, 'Aceptada', '2025-04-29'),
-(20, 3, 2, 'viernes', 4, '08:30:00', '17:30:00', NULL, 'Aceptada', '2025-04-29');
+(16, 1, 1, 'miércoles', 0, '12:30:00', '15:15:00', '2025-09-17', 'Aceptada', '2025-09-03'),
+(17, 2, 1, 'jueves', 1, '11:15:00', '14:30:00', '2025-09-18', 'Aceptada', '2025-09-03'),
+(18, 3, 1, 'viernes', 2, '13:45:00', '16:30:00', '2025-09-19', 'Aceptada', '2025-09-03'),
+(19, 2, 2, 'lunes', 3, '19:00:00', '21:30:00', NULL, 'Aceptada', '2025-09-03'),
+(20, 3, 2, 'martes', 4, '08:30:00', '10:30:00', NULL, 'Aceptada', '2025-09-03');
 
 -- --------------------------------------------------------
 
@@ -276,7 +274,7 @@ CREATE TABLE `consultas_horarios_bloqueos` (
 --
 
 INSERT INTO `consultas_horarios_bloqueos` (`id`, `idconsultas_horario`, `fecha_bloqueo`, `motivo`, `fecha_creacion`) VALUES
-(1, 17, '2025-05-02', 'No estoy ese día', '2025-05-01 15:08:40');
+(1, 17, '2025-09-18', 'No estoy ese día', '2025-09-04 15:08:40');
 
 -- --------------------------------------------------------
 
@@ -330,8 +328,8 @@ CREATE TABLE `profesor` (
 --
 
 INSERT INTO `profesor` (`idprofesor`, `nombre_profesor`, `legajo`, `correo`, `observaciones`) VALUES
-(1, 'test prof', '105698', 'test@gmail.com', 'observacion 1'),
-(2, 'Guiliana', '104891', 'giu@gmail.com', 'dfsgfggg');
+(1, 'Profesor1', '105698', 'juan.schar@web-experto.com.ar', 'Observacion 1'),
+(2, 'Profesor2', '104891', 'estebanschar@gmail.com', '');
 
 -- --------------------------------------------------------
 
@@ -353,9 +351,11 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`idusuario`, `usuario`, `password`, `idprofesor`, `idalumno`, `rol`) VALUES
-(1, 'admin', '7a42f3f6148e2404542e1b4eade9a918', NULL, NULL, 1),
-(2, 'Test Prof', '7a42f3f6148e2404542e1b4eade9a918', 1, NULL, 2),
-(3, 'Profesor 2', '7a42f3f6148e2404542e1b4eade9a918', 2, NULL, 2);
+(1, 'admin', '25f9e794323b453885f5181f1b624d0b', NULL, NULL, 1),
+(2, '105698', '25f9e794323b453885f5181f1b624d0b', 1, NULL, 2),
+(3, '104891', '25f9e794323b453885f5181f1b624d0b', 2, NULL, 2),
+(4, '41798', '25f9e794323b453885f5181f1b624d0b', NULL, 1, 3),
+(5, '41796', '25f9e794323b453885f5181f1b624d0b', NULL, 2, 3);
 
 INSERT INTO `materias_profesores` (`id`, `idmateria`, `idprofesor`) VALUES 
 (1, 1, 1), (2, 3, 1), (5, 2, 1), (3, 2, 2), (4, 3, 2);
