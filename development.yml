@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   web:
     build: .
@@ -9,23 +10,21 @@ services:
       - .:/var/www/html
     depends_on:
       - db
-    environment:
-      - MYSQL_HOST=db
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=secret
-      - MYSQL_DATABASE=gestion_consultas
+    env_file:
+      - ./build/env/development.env
+
   db:
     image: mysql:8.0
     container_name: mysql-db
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: gestion_consultas
-      MYSQL_USER: userdb
-      MYSQL_PASSWORD: userdbpass
+    env_file:
+      - ./build/env/development.env
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
+      - ./crear_base.sql:/docker-entrypoint-initdb.d/crear_base.sql
+
 volumes:
   db_data:
