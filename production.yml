@@ -18,7 +18,7 @@ services:
     env_file:
       - ./build/env/production.env
     expose:
-      - 8002
+      - 80
     volumes:
       - .:/var/www/html
     restart: always
@@ -27,12 +27,15 @@ services:
     image: mysql:8.0
     container_name: mysql-db
     restart: always
+    networks:
+      - default
     env_file:
       - ./build/env/production.env
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --bind-address=0.0.0.0 --port=3306
     volumes:
       - db_data:/var/lib/mysql
       - ./crear_base.sql:/docker-entrypoint-initdb.d/crear_base.sql
+      - ./init-user.sql:/docker-entrypoint-initdb.d/init-user.sql
 
 volumes:
   db_data:
