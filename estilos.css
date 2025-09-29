@@ -848,7 +848,7 @@ label {
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
-  z-index: 9998;
+  z-index: 1000;
 }
 
 .navbar .container,
